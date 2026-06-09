@@ -18,6 +18,11 @@ async function toggleUserStatus(adminId, userId) {
   return user;
 }
 
+async function getAgencies() {
+  const agencies = await Agency.findAll({ order: [['createdAt', 'DESC']] });
+  return agencies;
+}
+
 async function createAgency(adminId, data) {
   const agency = await Agency.create({ ...data, createdBy: adminId });
   return agency;
@@ -74,8 +79,7 @@ async function deactivateAgency(adminId, agencyId) {
 async function getAllBookings() {
   const bookings = await Booking.findAll({
     include: [
-      { model: Agency, attributes: ['name'] },
-      { model: Driver, attributes: ['name'] },
+      { model: Driver, attributes: ['name'], include: [{ model: Agency, attributes: ['name'] }] },
       { model: User, attributes: ['name'] },
     ],
     order: [['createdAt', 'DESC']],
@@ -122,6 +126,7 @@ async function getDashboardData() {
 module.exports = {
   getUsers,
   toggleUserStatus,
+  getAgencies,
   createAgency,
   updateAgency,
   deactivateAgency,

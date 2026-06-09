@@ -31,7 +31,6 @@ async function getDrivers(req, res, next) {
     const result = await agencyService.getDrivers(req.user.id, page, limit);
     res.json(result);
   } catch (err) {
-    if (err.status === 404) return res.status(404).json({ message: err.message });
     next(err);
   }
 }

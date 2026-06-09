@@ -1,8 +1,12 @@
 import React from 'react';
 
-function FormError({ message }) {
+function FormError({ message, className = '' }) {
   if (!message) return null;
-  return <div className="form-error-message">{message}</div>;
+  return (
+    <span className={`form-error ${className}`} role="alert">
+      {message}
+    </span>
+  );
 }
 
 export default FormError;

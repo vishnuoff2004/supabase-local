@@ -1,0 +1,656 @@
+﻿  console.warn
+    ΓÜá∩╕Å React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+
+    [0m [90m 24 |[39m [36mfunction[39m renderWithProviders() {
+     [90m 25 |[39m   localStorage[33m.[39msetItem([32m'token'[39m[33m,[39m [32m'mock-token'[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 26 |[39m   [36mreturn[39m render(
+     [90m    |[39m                [31m[1m^[22m[39m
+     [90m 27 |[39m     [33m<[39m[33mMemoryRouter[39m[33m>[39m
+     [90m 28 |[39m       [33m<[39m[33mAuthProvider[39m[33m>[39m
+     [90m 29 |[39m         [33m<[39m[33mBookingProvider[39m[33m>[39m[0m
+
+      at warnOnce (node_modules/react-router/lib/deprecations.ts:9:13)
+      at logDeprecation (node_modules/react-router/lib/deprecations.ts:14:3)
+      at logV6DeprecationWarnings (node_modules/react-router/lib/deprecations.ts:26:5)
+      at node_modules/react-router/lib/components.tsx:257:25
+      at commitHookEffectListMount (node_modules/react-dom/cjs/react-dom.development.js:23189:26)
+      at commitPassiveMountOnFiber (node_modules/react-dom/cjs/react-dom.development.js:24970:11)
+      at commitPassiveMountEffects_complete (node_modules/react-dom/cjs/react-dom.development.js:24930:9)
+      at commitPassiveMountEffects_begin (node_modules/react-dom/cjs/react-dom.development.js:24917:7)
+      at commitPassiveMountEffects (node_modules/react-dom/cjs/react-dom.development.js:24905:3)
+      at flushPassiveEffectsImpl (node_modules/react-dom/cjs/react-dom.development.js:27078:3)
+      at flushPassiveEffects (node_modules/react-dom/cjs/react-dom.development.js:27023:14)
+      at node_modules/react-dom/cjs/react-dom.development.js:26808:9
+      at flushActQueue (node_modules/react/cjs/react.development.js:2667:24)
+      at act (node_modules/react/cjs/react.development.js:2582:11)
+      at node_modules/@testing-library/react/dist/act-compat.js:46:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:189:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:291:10)
+      at renderWithProviders (src/__tests__/BookingHistoryPage.test.js:26:16)
+      at Object.<anonymous> (src/__tests__/BookingHistoryPage.test.js:46:5)
+
+node.exe : (node:12952) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland 
+alternative instead.
+At C:\nvm4w\nodejs\npx.ps1:29 char:3
++   & $NODE_EXE $NPX_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:12952) [D...native instead.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-deprecation ...` to show where the warning was created)
+  console.warn
+    ΓÜá∩╕Å React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+    [0m [90m 24 |[39m [36mfunction[39m renderWithProviders() {
+     [90m 25 |[39m   localStorage[33m.[39msetItem([32m'token'[39m[33m,[39m [32m'mock-token'[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 26 |[39m   [36mreturn[39m render(
+     [90m    |[39m                [31m[1m^[22m[39m
+     [90m 27 |[39m     [33m<[39m[33mMemoryRouter[39m[33m>[39m
+     [90m 28 |[39m       [33m<[39m[33mAuthProvider[39m[33m>[39m
+     [90m 29 |[39m         [33m<[39m[33mBookingProvider[39m[33m>[39m[0m
+
+      at warnOnce (node_modules/react-router/lib/deprecations.ts:9:13)
+      at logDeprecation (node_modules/react-router/lib/deprecations.ts:14:3)
+      at logV6DeprecationWarnings (node_modules/react-router/lib/deprecations.ts:37:5)
+      at node_modules/react-router/lib/components.tsx:257:25
+      at commitHookEffectListMount (node_modules/react-dom/cjs/react-dom.development.js:23189:26)
+      at commitPassiveMountOnFiber (node_modules/react-dom/cjs/react-dom.development.js:24970:11)
+      at commitPassiveMountEffects_complete (node_modules/react-dom/cjs/react-dom.development.js:24930:9)
+      at commitPassiveMountEffects_begin (node_modules/react-dom/cjs/react-dom.development.js:24917:7)
+      at commitPassiveMountEffects (node_modules/react-dom/cjs/react-dom.development.js:24905:3)
+      at flushPassiveEffectsImpl (node_modules/react-dom/cjs/react-dom.development.js:27078:3)
+      at flushPassiveEffects (node_modules/react-dom/cjs/react-dom.development.js:27023:14)
+      at node_modules/react-dom/cjs/react-dom.development.js:26808:9
+      at flushActQueue (node_modules/react/cjs/react.development.js:2667:24)
+      at act (node_modules/react/cjs/react.development.js:2582:11)
+      at node_modules/@testing-library/react/dist/act-compat.js:46:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:189:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:291:10)
+      at renderWithProviders (src/__tests__/BookingHistoryPage.test.js:26:16)
+      at Object.<anonymous> (src/__tests__/BookingHistoryPage.test.js:46:5)
+
+(node:17032) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative 
+instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:10708) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative 
+instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+PASS src/__tests__/BookingHistoryPage.test.js (6.944 s)
+  BookingHistoryPage ΓÇö REQ-048, REQ-049, REQ-050
+    ΓêÜ TEST-171: displays loading skeleton on mount (246 ms)
+    ΓêÜ TEST-172: renders bookings using bookingService (93 ms)
+    ΓêÜ TEST-173: renders error state when bookingService fails (45 ms)
+    ΓêÜ TEST-174: shows empty state when no bookings (45 ms)
+    ΓêÜ TEST-175: uses BookingContext provider for state (30 ms)
+    ΓêÜ TEST-176: pagination appears for multi-page results (47 ms)
+
+PASS src/__tests__/AnalyticsPage.test.js (7.242 s)
+  AnalyticsPage ΓÇö REQ-051
+    ΓêÜ TEST-177: displays loading skeleton on mount (130 ms)
+    ΓêÜ TEST-178: renders analytics data from service (106 ms)
+    ΓêÜ TEST-179: renders error state when service fails (119 ms)
+    ΓêÜ TEST-180: shows empty state when no data (103 ms)
+    ΓêÜ TEST-181: applies date filter on button click (281 ms)
+    ΓêÜ TEST-182: displays total booking count (47 ms)
+
+PASS src/__tests__/UserManagementPage.test.js (7.851 s)
+  UserManagementPage ΓÇö REQ-045, REQ-046, REQ-047
+    ΓêÜ TEST-164: displays loading skeleton on mount (140 ms)
+    ΓêÜ TEST-165: renders users from API response via adminService (202 ms)
+    ΓêÜ TEST-166: renders error state when adminService fails (51 ms)
+    ΓêÜ TEST-167: shows empty state when no users (56 ms)
+    ΓêÜ TEST-168: calls toggleUserStatus on button click (313 ms)
+    ΓêÜ TEST-169: shows error when toggleUserStatus fails (256 ms)
+    ΓêÜ TEST-170: renders pagination when totalPages > 1 (151 ms)
+
+PASS src/__tests__/BookingContext.test.js
+  BookingContext ΓÇö REQ-050
+    ΓêÜ TEST-200: provides initial empty state (55 ms)
+    ΓêÜ TEST-201: getBookings fetches and sets bookings (73 ms)
+    ΓêÜ TEST-202: cancelBooking calls API (11 ms)
+    ΓêÜ TEST-203: throws error when used outside provider (112 ms)
+
+PASS src/__tests__/ServiceLayer.test.js
+  Service Layer ΓÇö REQ-054
+    ΓêÜ TEST-194: adminService.getUsers returns user list (53 ms)
+    ΓêÜ TEST-195: adminService.toggleUserStatus sends PUT request (1 ms)
+    ΓêÜ TEST-196: bookingService.getBookings returns paginated bookings (4 ms)
+    ΓêÜ TEST-199: service functions reject when API fails (38 ms)
+
+PASS src/__tests__/AuthContext.test.js
+  AuthContext
+    ΓêÜ should start with loading true then false (14 ms)
+    ΓêÜ should have null user and token when not logged in (6 ms)
+    ΓêÜ should set user from stored token (13 ms)
+
+PASS src/__tests__/NotificationContext.test.js
+  NotificationContext
+    ΓêÜ should start with empty notifications (11 ms)
+    ΓêÜ should add notification and auto-remove after 3s (13 ms)
+    ΓêÜ should manually remove notification (9 ms)
+
+  console.warn
+    ΓÜá∩╕Å React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+
+    [0m [90m 17 |[39m
+     [90m 18 |[39m [36mfunction[39m renderRoute() {
+    [31m[1m>[22m[39m[90m 19 |[39m   [36mreturn[39m render(
+     [90m    |[39m                [31m[1m^[22m[39m
+     [90m 20 |[39m     [33m<[39m[33mMemoryRouter[39m initialEntries[33m=[39m{[[32m'/test'[39m]}[33m>[39m
+     [90m 21 |[39m       [33m<[39m[33mRoutes[39m[33m>[39m
+     [90m 22 |[39m         [33m<[39m[33mRoute[39m path[33m=[39m[32m"/test"[39m element[33m=[39m{[0m
+
+      at warnOnce (node_modules/react-router/lib/deprecations.ts:9:13)
+      at logDeprecation (node_modules/react-router/lib/deprecations.ts:14:3)
+      at logV6DeprecationWarnings (node_modules/react-router/lib/deprecations.ts:26:5)
+      at node_modules/react-router/lib/components.tsx:257:25
+      at commitHookEffectListMount (node_modules/react-dom/cjs/react-dom.development.js:23189:26)
+      at commitPassiveMountOnFiber (node_modules/react-dom/cjs/react-dom.development.js:24970:11)
+      at commitPassiveMountEffects_complete (node_modules/react-dom/cjs/react-dom.development.js:24930:9)
+      at commitPassiveMountEffects_begin (node_modules/react-dom/cjs/react-dom.development.js:24917:7)
+      at commitPassiveMountEffects (node_modules/react-dom/cjs/react-dom.development.js:24905:3)
+      at flushPassiveEffectsImpl (node_modules/react-dom/cjs/react-dom.development.js:27078:3)
+      at flushPassiveEffects (node_modules/react-dom/cjs/react-dom.development.js:27023:14)
+      at node_modules/react-dom/cjs/react-dom.development.js:26808:9
+      at flushActQueue (node_modules/react/cjs/react.development.js:2667:24)
+      at act (node_modules/react/cjs/react.development.js:2582:11)
+      at node_modules/@testing-library/react/dist/act-compat.js:46:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:189:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:291:10)
+      at renderRoute (src/__tests__/RoleRoute.test.js:19:16)
+      at Object.<anonymous> (src/__tests__/RoleRoute.test.js:40:5)
+
+  console.warn
+    ΓÜá∩╕Å React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+    [0m [90m 17 |[39m
+     [90m 18 |[39m [36mfunction[39m renderRoute() {
+    [31m[1m>[22m[39m[90m 19 |[39m   [36mreturn[39m render(
+     [90m    |[39m                [31m[1m^[22m[39m
+     [90m 20 |[39m     [33m<[39m[33mMemoryRouter[39m initialEntries[33m=[39m{[[32m'/test'[39m]}[33m>[39m
+     [90m 21 |[39m       [33m<[39m[33mRoutes[39m[33m>[39m
+     [90m 22 |[39m         [33m<[39m[33mRoute[39m path[33m=[39m[32m"/test"[39m element[33m=[39m{[0m
+
+      at warnOnce (node_modules/react-router/lib/deprecations.ts:9:13)
+      at logDeprecation (node_modules/react-router/lib/deprecations.ts:14:3)
+      at logV6DeprecationWarnings (node_modules/react-router/lib/deprecations.ts:37:5)
+      at node_modules/react-router/lib/components.tsx:257:25
+      at commitHookEffectListMount (node_modules/react-dom/cjs/react-dom.development.js:23189:26)
+      at commitPassiveMountOnFiber (node_modules/react-dom/cjs/react-dom.development.js:24970:11)
+      at commitPassiveMountEffects_complete (node_modules/react-dom/cjs/react-dom.development.js:24930:9)
+      at commitPassiveMountEffects_begin (node_modules/react-dom/cjs/react-dom.development.js:24917:7)
+      at commitPassiveMountEffects (node_modules/react-dom/cjs/react-dom.development.js:24905:3)
+      at flushPassiveEffectsImpl (node_modules/react-dom/cjs/react-dom.development.js:27078:3)
+      at flushPassiveEffects (node_modules/react-dom/cjs/react-dom.development.js:27023:14)
+      at node_modules/react-dom/cjs/react-dom.development.js:26808:9
+      at flushActQueue (node_modules/react/cjs/react.development.js:2667:24)
+      at act (node_modules/react/cjs/react.development.js:2582:11)
+      at node_modules/@testing-library/react/dist/act-compat.js:46:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:189:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:291:10)
+      at renderRoute (src/__tests__/RoleRoute.test.js:19:16)
+      at Object.<anonymous> (src/__tests__/RoleRoute.test.js:40:5)
+
+PASS src/__tests__/RoleRoute.test.js
+  RoleRoute ΓÇö REQ-052
+    ΓêÜ TEST-183: renders children when user has required role (101 ms)
+    ΓêÜ TEST-184: redirects when user lacks required role (9 ms)
+    ΓêÜ TEST-185: redirects when no user (7 ms)
+    ΓêÜ TEST-186: shows loading state while auth is loading (6 ms)
+
+PASS src/__tests__/useFormPreservation.test.js
+  useFormPreservation
+    ΓêÜ should return initial values when no saved data (9 ms)
+    ΓêÜ should save and restore form values (5 ms)
+    ΓêÜ should restore saved values from localStorage (19 ms)
+    ΓêÜ should clear saved values (4 ms)
+
+  console.error
+    Error: Not implemented: window.scrollTo
+        at module.exports (F:\myproject\frontend\node_modules\jsdom\lib\jsdom\browser\not-implemented.js:9:17)
+        at scrollTo (F:\myproject\frontend\node_modules\jsdom\lib\jsdom\browser\Window.js:866:7)
+        at F:\myproject\frontend\src\App.js:14:12
+        at commitHookEffectListMount (F:\myproject\frontend\node_modules\react-dom\cjs\react-dom.development.js:23189:26)
+        at commitPassiveMountOnFiber (F:\myproject\frontend\node_modules\react-dom\cjs\react-dom.development.js:24970:11)
+        at commitPassiveMountEffects_complete (F:\myproject\frontend\node_modules\react-dom\cjs\react-dom.development.js:24930:9)
+        at commitPassiveMountEffects_begin (F:\myproject\frontend\node_modules\react-dom\cjs\react-dom.development.js:24917:7)
+        at commitPassiveMountEffects (F:\myproject\frontend\node_modules\react-dom\cjs\react-dom.development.js:24905:3)
+        at flushPassiveEffectsImpl (F:\myproject\frontend\node_modules\react-dom\cjs\react-dom.development.js:27078:3)
+        at flushPassiveEffects (F:\myproject\frontend\node_modules\react-dom\cjs\react-dom.development.js:27023:14)
+        at F:\myproject\frontend\node_modules\react-dom\cjs\react-dom.development.js:26808:9
+        at flushActQueue (F:\myproject\frontend\node_modules\react\cjs\react.development.js:2667:24)
+        at act (F:\myproject\frontend\node_modules\react\cjs\react.development.js:2582:11)
+        at F:\myproject\frontend\node_modules\@testing-library\react\dist\act-compat.js:46:25
+        at renderRoot (F:\myproject\frontend\node_modules\@testing-library\react\dist\pure.js:189:26)
+        at render (F:\myproject\frontend\node_modules\@testing-library\react\dist\pure.js:291:10)
+        at Object.<anonymous> (F:\myproject\frontend\src\__tests__\AppIntegration.test.js:26:11)
+        at Promise.then.completed (F:\myproject\frontend\node_modules\jest-circus\build\utils.js:391:28)
+        at new Promise (<anonymous>)
+        at callAsyncCircusFn (F:\myproject\frontend\node_modules\jest-circus\build\utils.js:316:10)
+        at _callCircusTest (F:\myproject\frontend\node_modules\jest-circus\build\run.js:218:40)
+        at processTicksAndRejections (node:internal/process/task_queues:105:5)
+        at _runTest (F:\myproject\frontend\node_modules\jest-circus\build\run.js:155:3)
+        at _runTestsForDescribeBlock (F:\myproject\frontend\node_modules\jest-circus\build\run.js:66:9)
+        at _runTestsForDescribeBlock (F:\myproject\frontend\node_modules\jest-circus\build\run.js:60:9)
+        at run (F:\myproject\frontend\node_modules\jest-circus\build\run.js:25:3)
+        at runAndTransformResultsToJestFormat (F:\myproject\frontend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:170:21)
+        at jestAdapter (F:\myproject\frontend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:82:19)
+        at runTestInternal (F:\myproject\frontend\node_modules\jest-runner\build\runTest.js:389:16)
+        at runTest (F:\myproject\frontend\node_modules\jest-runner\build\runTest.js:475:34)
+        at Object.worker (F:\myproject\frontend\node_modules\jest-runner\build\testWorker.js:133:12) undefined
+
+    [0m [90m 12 |[39m   [36mconst[39m { pathname } [33m=[39m useLocation()[33m;[39m
+     [90m 13 |[39m   useEffect(() [33m=>[39m {
+    [31m[1m>[22m[39m[90m 14 |[39m     window[33m.[39mscrollTo([35m0[39m[33m,[39m [35m0[39m)[33m;[39m
+     [90m    |[39m            [31m[1m^[22m[39m
+     [90m 15 |[39m   }[33m,[39m [pathname])[33m;[39m
+     [90m 16 |[39m   [36mreturn[39m [36mnull[39m[33m;[39m
+     [90m 17 |[39m }[0m
+
+      at VirtualConsole.<anonymous> (node_modules/jsdom/lib/jsdom/virtual-console.js:29:45)
+      at module.exports (node_modules/jsdom/lib/jsdom/browser/not-implemented.js:12:26)
+      at scrollTo (node_modules/jsdom/lib/jsdom/browser/Window.js:866:7)
+      at src/App.js:14:12
+      at commitHookEffectListMount (node_modules/react-dom/cjs/react-dom.development.js:23189:26)
+      at commitPassiveMountOnFiber (node_modules/react-dom/cjs/react-dom.development.js:24970:11)
+      at commitPassiveMountEffects_complete (node_modules/react-dom/cjs/react-dom.development.js:24930:9)
+      at commitPassiveMountEffects_begin (node_modules/react-dom/cjs/react-dom.development.js:24917:7)
+      at commitPassiveMountEffects (node_modules/react-dom/cjs/react-dom.development.js:24905:3)
+      at flushPassiveEffectsImpl (node_modules/react-dom/cjs/react-dom.development.js:27078:3)
+      at flushPassiveEffects (node_modules/react-dom/cjs/react-dom.development.js:27023:14)
+      at node_modules/react-dom/cjs/react-dom.development.js:26808:9
+      at flushActQueue (node_modules/react/cjs/react.development.js:2667:24)
+      at act (node_modules/react/cjs/react.development.js:2582:11)
+      at node_modules/@testing-library/react/dist/act-compat.js:46:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:189:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:291:10)
+      at Object.<anonymous> (src/__tests__/AppIntegration.test.js:26:11)
+
+  console.warn
+    ΓÜá∩╕Å React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+
+    [0m [90m 24 |[39m describe([32m'App Integration ΓÇö REQ-050, REQ-053'[39m[33m,[39m () [33m=>[39m {
+     [90m 25 |[39m   test([32m'TEST-204: App mounts with all providers'[39m[33m,[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 26 |[39m     render([33m<[39m[33mApp[39m [33m/[39m[33m>[39m)[33m;[39m
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 27 |[39m     expect(screen[33m.[39mgetByTestId([32m'app-routes'[39m))[33m.[39mtoBeInTheDocument()[33m;[39m
+     [90m 28 |[39m   })[33m;[39m
+     [90m 29 |[39m[0m
+
+      at warnOnce (node_modules/react-router/lib/deprecations.ts:9:13)
+      at logDeprecation (node_modules/react-router/lib/deprecations.ts:14:3)
+      at Object.logV6DeprecationWarnings [as UNSAFE_logV6DeprecationWarnings] (node_modules/react-router/lib/deprecations.ts:26:5)
+      at node_modules/react-router-dom/index.tsx:816:25
+      at commitHookEffectListMount (node_modules/react-dom/cjs/react-dom.development.js:23189:26)
+      at commitPassiveMountOnFiber (node_modules/react-dom/cjs/react-dom.development.js:24970:11)
+      at commitPassiveMountEffects_complete (node_modules/react-dom/cjs/react-dom.development.js:24930:9)
+      at commitPassiveMountEffects_begin (node_modules/react-dom/cjs/react-dom.development.js:24917:7)
+      at commitPassiveMountEffects (node_modules/react-dom/cjs/react-dom.development.js:24905:3)
+      at flushPassiveEffectsImpl (node_modules/react-dom/cjs/react-dom.development.js:27078:3)
+      at flushPassiveEffects (node_modules/react-dom/cjs/react-dom.development.js:27023:14)
+      at node_modules/react-dom/cjs/react-dom.development.js:26808:9
+      at flushActQueue (node_modules/react/cjs/react.development.js:2667:24)
+      at act (node_modules/react/cjs/react.development.js:2582:11)
+      at node_modules/@testing-library/react/dist/act-compat.js:46:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:189:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:291:10)
+      at Object.<anonymous> (src/__tests__/AppIntegration.test.js:26:11)
+
+  console.warn
+    ΓÜá∩╕Å React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+    [0m [90m 24 |[39m describe([32m'App Integration ΓÇö REQ-050, REQ-053'[39m[33m,[39m () [33m=>[39m {
+     [90m 25 |[39m   test([32m'TEST-204: App mounts with all providers'[39m[33m,[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 26 |[39m     render([33m<[39m[33mApp[39m [33m/[39m[33m>[39m)[33m;[39m
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 27 |[39m     expect(screen[33m.[39mgetByTestId([32m'app-routes'[39m))[33m.[39mtoBeInTheDocument()[33m;[39m
+     [90m 28 |[39m   })[33m;[39m
+     [90m 29 |[39m[0m
+
+      at warnOnce (node_modules/react-router/lib/deprecations.ts:9:13)
+      at logDeprecation (node_modules/react-router/lib/deprecations.ts:14:3)
+      at Object.logV6DeprecationWarnings [as UNSAFE_logV6DeprecationWarnings] (node_modules/react-router/lib/deprecations.ts:37:5)
+      at node_modules/react-router-dom/index.tsx:816:25
+      at commitHookEffectListMount (node_modules/react-dom/cjs/react-dom.development.js:23189:26)
+      at commitPassiveMountOnFiber (node_modules/react-dom/cjs/react-dom.development.js:24970:11)
+      at commitPassiveMountEffects_complete (node_modules/react-dom/cjs/react-dom.development.js:24930:9)
+      at commitPassiveMountEffects_begin (node_modules/react-dom/cjs/react-dom.development.js:24917:7)
+      at commitPassiveMountEffects (node_modules/react-dom/cjs/react-dom.development.js:24905:3)
+      at flushPassiveEffectsImpl (node_modules/react-dom/cjs/react-dom.development.js:27078:3)
+      at flushPassiveEffects (node_modules/react-dom/cjs/react-dom.development.js:27023:14)
+      at node_modules/react-dom/cjs/react-dom.development.js:26808:9
+      at flushActQueue (node_modules/react/cjs/react.development.js:2667:24)
+      at act (node_modules/react/cjs/react.development.js:2582:11)
+      at node_modules/@testing-library/react/dist/act-compat.js:46:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:189:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:291:10)
+      at Object.<anonymous> (src/__tests__/AppIntegration.test.js:26:11)
+
+  console.error
+    Error: Not implemented: window.scrollTo
+        at module.exports (F:\myproject\frontend\node_modules\jsdom\lib\jsdom\browser\not-implemented.js:9:17)
+        at scrollTo (F:\myproject\frontend\node_modules\jsdom\lib\jsdom\browser\Window.js:866:7)
+        at F:\myproject\frontend\src\App.js:14:12
+        at commitHookEffectListMount (F:\myproject\frontend\node_modules\react-dom\cjs\react-dom.development.js:23189:26)
+        at commitPassiveMountOnFiber (F:\myproject\frontend\node_modules\react-dom\cjs\react-dom.development.js:24970:11)
+        at commitPassiveMountEffects_complete (F:\myproject\frontend\node_modules\react-dom\cjs\react-dom.development.js:24930:9)
+        at commitPassiveMountEffects_begin (F:\myproject\frontend\node_modules\react-dom\cjs\react-dom.development.js:24917:7)
+        at commitPassiveMountEffects (F:\myproject\frontend\node_modules\react-dom\cjs\react-dom.development.js:24905:3)
+        at flushPassiveEffectsImpl (F:\myproject\frontend\node_modules\react-dom\cjs\react-dom.development.js:27078:3)
+        at flushPassiveEffects (F:\myproject\frontend\node_modules\react-dom\cjs\react-dom.development.js:27023:14)
+        at F:\myproject\frontend\node_modules\react-dom\cjs\react-dom.development.js:26808:9
+        at flushActQueue (F:\myproject\frontend\node_modules\react\cjs\react.development.js:2667:24)
+        at act (F:\myproject\frontend\node_modules\react\cjs\react.development.js:2582:11)
+        at F:\myproject\frontend\node_modules\@testing-library\react\dist\act-compat.js:46:25
+        at renderRoot (F:\myproject\frontend\node_modules\@testing-library\react\dist\pure.js:189:26)
+        at render (F:\myproject\frontend\node_modules\@testing-library\react\dist\pure.js:291:10)
+        at Object.<anonymous> (F:\myproject\frontend\src\__tests__\AppIntegration.test.js:31:11)
+        at Promise.then.completed (F:\myproject\frontend\node_modules\jest-circus\build\utils.js:391:28)
+        at new Promise (<anonymous>)
+        at callAsyncCircusFn (F:\myproject\frontend\node_modules\jest-circus\build\utils.js:316:10)
+        at _callCircusTest (F:\myproject\frontend\node_modules\jest-circus\build\run.js:218:40)
+        at processTicksAndRejections (node:internal/process/task_queues:105:5)
+        at _runTest (F:\myproject\frontend\node_modules\jest-circus\build\run.js:155:3)
+        at _runTestsForDescribeBlock (F:\myproject\frontend\node_modules\jest-circus\build\run.js:66:9)
+        at _runTestsForDescribeBlock (F:\myproject\frontend\node_modules\jest-circus\build\run.js:60:9)
+        at run (F:\myproject\frontend\node_modules\jest-circus\build\run.js:25:3)
+        at runAndTransformResultsToJestFormat (F:\myproject\frontend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:170:21)
+        at jestAdapter (F:\myproject\frontend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:82:19)
+        at runTestInternal (F:\myproject\frontend\node_modules\jest-runner\build\runTest.js:389:16)
+        at runTest (F:\myproject\frontend\node_modules\jest-runner\build\runTest.js:475:34)
+        at Object.worker (F:\myproject\frontend\node_modules\jest-runner\build\testWorker.js:133:12) undefined
+
+    [0m [90m 12 |[39m   [36mconst[39m { pathname } [33m=[39m useLocation()[33m;[39m
+     [90m 13 |[39m   useEffect(() [33m=>[39m {
+    [31m[1m>[22m[39m[90m 14 |[39m     window[33m.[39mscrollTo([35m0[39m[33m,[39m [35m0[39m)[33m;[39m
+     [90m    |[39m            [31m[1m^[22m[39m
+     [90m 15 |[39m   }[33m,[39m [pathname])[33m;[39m
+     [90m 16 |[39m   [36mreturn[39m [36mnull[39m[33m;[39m
+     [90m 17 |[39m }[0m
+
+      at VirtualConsole.<anonymous> (node_modules/jsdom/lib/jsdom/virtual-console.js:29:45)
+      at module.exports (node_modules/jsdom/lib/jsdom/browser/not-implemented.js:12:26)
+      at scrollTo (node_modules/jsdom/lib/jsdom/browser/Window.js:866:7)
+      at src/App.js:14:12
+      at commitHookEffectListMount (node_modules/react-dom/cjs/react-dom.development.js:23189:26)
+      at commitPassiveMountOnFiber (node_modules/react-dom/cjs/react-dom.development.js:24970:11)
+      at commitPassiveMountEffects_complete (node_modules/react-dom/cjs/react-dom.development.js:24930:9)
+      at commitPassiveMountEffects_begin (node_modules/react-dom/cjs/react-dom.development.js:24917:7)
+      at commitPassiveMountEffects (node_modules/react-dom/cjs/react-dom.development.js:24905:3)
+      at flushPassiveEffectsImpl (node_modules/react-dom/cjs/react-dom.development.js:27078:3)
+      at flushPassiveEffects (node_modules/react-dom/cjs/react-dom.development.js:27023:14)
+      at node_modules/react-dom/cjs/react-dom.development.js:26808:9
+      at flushActQueue (node_modules/react/cjs/react.development.js:2667:24)
+      at act (node_modules/react/cjs/react.development.js:2582:11)
+      at node_modules/@testing-library/react/dist/act-compat.js:46:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:189:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:291:10)
+      at Object.<anonymous> (src/__tests__/AppIntegration.test.js:31:11)
+
+  console.error
+    Error: Not implemented: window.scrollTo
+        at module.exports (F:\myproject\frontend\node_modules\jsdom\lib\jsdom\browser\not-implemented.js:9:17)
+        at scrollTo (F:\myproject\frontend\node_modules\jsdom\lib\jsdom\browser\Window.js:866:7)
+        at F:\myproject\frontend\src\App.js:14:12
+        at commitHookEffectListMount (F:\myproject\frontend\node_modules\react-dom\cjs\react-dom.development.js:23189:26)
+        at commitPassiveMountOnFiber (F:\myproject\frontend\node_modules\react-dom\cjs\react-dom.development.js:24970:11)
+        at commitPassiveMountEffects_complete (F:\myproject\frontend\node_modules\react-dom\cjs\react-dom.development.js:24930:9)
+        at commitPassiveMountEffects_begin (F:\myproject\frontend\node_modules\react-dom\cjs\react-dom.development.js:24917:7)
+        at commitPassiveMountEffects (F:\myproject\frontend\node_modules\react-dom\cjs\react-dom.development.js:24905:3)
+        at flushPassiveEffectsImpl (F:\myproject\frontend\node_modules\react-dom\cjs\react-dom.development.js:27078:3)
+        at flushPassiveEffects (F:\myproject\frontend\node_modules\react-dom\cjs\react-dom.development.js:27023:14)
+        at F:\myproject\frontend\node_modules\react-dom\cjs\react-dom.development.js:26808:9
+        at flushActQueue (F:\myproject\frontend\node_modules\react\cjs\react.development.js:2667:24)
+        at act (F:\myproject\frontend\node_modules\react\cjs\react.development.js:2582:11)
+        at F:\myproject\frontend\node_modules\@testing-library\react\dist\act-compat.js:46:25
+        at renderRoot (F:\myproject\frontend\node_modules\@testing-library\react\dist\pure.js:189:26)
+        at render (F:\myproject\frontend\node_modules\@testing-library\react\dist\pure.js:291:10)
+        at Object.<anonymous> (F:\myproject\frontend\src\__tests__\AppIntegration.test.js:36:11)
+        at Promise.then.completed (F:\myproject\frontend\node_modules\jest-circus\build\utils.js:391:28)
+        at new Promise (<anonymous>)
+        at callAsyncCircusFn (F:\myproject\frontend\node_modules\jest-circus\build\utils.js:316:10)
+        at _callCircusTest (F:\myproject\frontend\node_modules\jest-circus\build\run.js:218:40)
+        at processTicksAndRejections (node:internal/process/task_queues:105:5)
+        at _runTest (F:\myproject\frontend\node_modules\jest-circus\build\run.js:155:3)
+        at _runTestsForDescribeBlock (F:\myproject\frontend\node_modules\jest-circus\build\run.js:66:9)
+        at _runTestsForDescribeBlock (F:\myproject\frontend\node_modules\jest-circus\build\run.js:60:9)
+        at run (F:\myproject\frontend\node_modules\jest-circus\build\run.js:25:3)
+        at runAndTransformResultsToJestFormat (F:\myproject\frontend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:170:21)
+        at jestAdapter (F:\myproject\frontend\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:82:19)
+        at runTestInternal (F:\myproject\frontend\node_modules\jest-runner\build\runTest.js:389:16)
+        at runTest (F:\myproject\frontend\node_modules\jest-runner\build\runTest.js:475:34)
+        at Object.worker (F:\myproject\frontend\node_modules\jest-runner\build\testWorker.js:133:12) undefined
+
+    [0m [90m 12 |[39m   [36mconst[39m { pathname } [33m=[39m useLocation()[33m;[39m
+     [90m 13 |[39m   useEffect(() [33m=>[39m {
+    [31m[1m>[22m[39m[90m 14 |[39m     window[33m.[39mscrollTo([35m0[39m[33m,[39m [35m0[39m)[33m;[39m
+     [90m    |[39m            [31m[1m^[22m[39m
+     [90m 15 |[39m   }[33m,[39m [pathname])[33m;[39m
+     [90m 16 |[39m   [36mreturn[39m [36mnull[39m[33m;[39m
+     [90m 17 |[39m }[0m
+
+      at VirtualConsole.<anonymous> (node_modules/jsdom/lib/jsdom/virtual-console.js:29:45)
+      at module.exports (node_modules/jsdom/lib/jsdom/browser/not-implemented.js:12:26)
+      at scrollTo (node_modules/jsdom/lib/jsdom/browser/Window.js:866:7)
+      at src/App.js:14:12
+      at commitHookEffectListMount (node_modules/react-dom/cjs/react-dom.development.js:23189:26)
+      at commitPassiveMountOnFiber (node_modules/react-dom/cjs/react-dom.development.js:24970:11)
+      at commitPassiveMountEffects_complete (node_modules/react-dom/cjs/react-dom.development.js:24930:9)
+      at commitPassiveMountEffects_begin (node_modules/react-dom/cjs/react-dom.development.js:24917:7)
+      at commitPassiveMountEffects (node_modules/react-dom/cjs/react-dom.development.js:24905:3)
+      at flushPassiveEffectsImpl (node_modules/react-dom/cjs/react-dom.development.js:27078:3)
+      at flushPassiveEffects (node_modules/react-dom/cjs/react-dom.development.js:27023:14)
+      at node_modules/react-dom/cjs/react-dom.development.js:26808:9
+      at flushActQueue (node_modules/react/cjs/react.development.js:2667:24)
+      at act (node_modules/react/cjs/react.development.js:2582:11)
+      at node_modules/@testing-library/react/dist/act-compat.js:46:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:189:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:291:10)
+      at Object.<anonymous> (src/__tests__/AppIntegration.test.js:36:11)
+
+PASS src/__tests__/AppIntegration.test.js
+  App Integration ΓÇö REQ-050, REQ-053
+    ΓêÜ TEST-204: App mounts with all providers (241 ms)
+    ΓêÜ TEST-205: BookingProvider is mounted in provider tree (44 ms)
+    ΓêÜ TEST-206: AppRoutes is rendered inside providers (12 ms)
+
+  console.warn
+    ΓÜá∩╕Å React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+
+    [0m [90m 17 |[39m
+     [90m 18 |[39m [36mfunction[39m renderApp(initialRoute) {
+    [31m[1m>[22m[39m[90m 19 |[39m   [36mreturn[39m render(
+     [90m    |[39m                [31m[1m^[22m[39m
+     [90m 20 |[39m     [33m<[39m[33mMemoryRouter[39m initialEntries[33m=[39m{[initialRoute]}[33m>[39m
+     [90m 21 |[39m       [33m<[39m[33mAppRoutes[39m [33m/[39m[33m>[39m
+     [90m 22 |[39m     [33m<[39m[33m/[39m[33mMemoryRouter[39m[33m>[39m[0m
+
+      at warnOnce (node_modules/react-router/lib/deprecations.ts:9:13)
+      at logDeprecation (node_modules/react-router/lib/deprecations.ts:14:3)
+      at logV6DeprecationWarnings (node_modules/react-router/lib/deprecations.ts:26:5)
+      at node_modules/react-router/lib/components.tsx:257:25
+      at commitHookEffectListMount (node_modules/react-dom/cjs/react-dom.development.js:23189:26)
+      at commitPassiveMountOnFiber (node_modules/react-dom/cjs/react-dom.development.js:24970:11)
+      at commitPassiveMountEffects_complete (node_modules/react-dom/cjs/react-dom.development.js:24930:9)
+      at commitPassiveMountEffects_begin (node_modules/react-dom/cjs/react-dom.development.js:24917:7)
+      at commitPassiveMountEffects (node_modules/react-dom/cjs/react-dom.development.js:24905:3)
+      at flushPassiveEffectsImpl (node_modules/react-dom/cjs/react-dom.development.js:27078:3)
+      at flushPassiveEffects (node_modules/react-dom/cjs/react-dom.development.js:27023:14)
+      at node_modules/react-dom/cjs/react-dom.development.js:26808:9
+      at flushActQueue (node_modules/react/cjs/react.development.js:2667:24)
+      at act (node_modules/react/cjs/react.development.js:2582:11)
+      at node_modules/@testing-library/react/dist/act-compat.js:46:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:189:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:291:10)
+      at renderApp (src/__tests__/RouteConfig.test.js:19:16)
+      at Object.<anonymous> (src/__tests__/RouteConfig.test.js:34:5)
+
+  console.warn
+    ΓÜá∩╕Å React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+    [0m [90m 17 |[39m
+     [90m 18 |[39m [36mfunction[39m renderApp(initialRoute) {
+    [31m[1m>[22m[39m[90m 19 |[39m   [36mreturn[39m render(
+     [90m    |[39m                [31m[1m^[22m[39m
+     [90m 20 |[39m     [33m<[39m[33mMemoryRouter[39m initialEntries[33m=[39m{[initialRoute]}[33m>[39m
+     [90m 21 |[39m       [33m<[39m[33mAppRoutes[39m [33m/[39m[33m>[39m
+     [90m 22 |[39m     [33m<[39m[33m/[39m[33mMemoryRouter[39m[33m>[39m[0m
+
+      at warnOnce (node_modules/react-router/lib/deprecations.ts:9:13)
+      at logDeprecation (node_modules/react-router/lib/deprecations.ts:14:3)
+      at logV6DeprecationWarnings (node_modules/react-router/lib/deprecations.ts:37:5)
+      at node_modules/react-router/lib/components.tsx:257:25
+      at commitHookEffectListMount (node_modules/react-dom/cjs/react-dom.development.js:23189:26)
+      at commitPassiveMountOnFiber (node_modules/react-dom/cjs/react-dom.development.js:24970:11)
+      at commitPassiveMountEffects_complete (node_modules/react-dom/cjs/react-dom.development.js:24930:9)
+      at commitPassiveMountEffects_begin (node_modules/react-dom/cjs/react-dom.development.js:24917:7)
+      at commitPassiveMountEffects (node_modules/react-dom/cjs/react-dom.development.js:24905:3)
+      at flushPassiveEffectsImpl (node_modules/react-dom/cjs/react-dom.development.js:27078:3)
+      at flushPassiveEffects (node_modules/react-dom/cjs/react-dom.development.js:27023:14)
+      at node_modules/react-dom/cjs/react-dom.development.js:26808:9
+      at flushActQueue (node_modules/react/cjs/react.development.js:2667:24)
+      at act (node_modules/react/cjs/react.development.js:2582:11)
+      at node_modules/@testing-library/react/dist/act-compat.js:46:25
+      at renderRoot (node_modules/@testing-library/react/dist/pure.js:189:26)
+      at render (node_modules/@testing-library/react/dist/pure.js:291:10)
+      at renderApp (src/__tests__/RouteConfig.test.js:19:16)
+      at Object.<anonymous> (src/__tests__/RouteConfig.test.js:34:5)
+
+  console.error
+    Warning: An update to BookingHistoryPage inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+        at BookingHistoryPage (F:\myproject\frontend\src\pages\traveler\BookingHistoryPage.js:12:43)
+        at RenderedRoute (F:\myproject\frontend\node_modules\react-router\lib\hooks.tsx:658:26)
+        at Outlet (F:\myproject\frontend\node_modules\react-router\lib\components.tsx:341:26)
+        at main
+        at div
+        at MainLayout (F:\myproject\frontend\src\layouts\MainLayout.js:10:31)
+        at RenderedRoute (F:\myproject\frontend\node_modules\react-router\lib\hooks.tsx:658:26)
+        at Outlet (F:\myproject\frontend\node_modules\react-router\lib\components.tsx:341:26)
+        at ProtectedRoute (F:\myproject\frontend\src\components\common\ProtectedRoute.js:8:31)
+        at RenderedRoute (F:\myproject\frontend\node_modules\react-router\lib\hooks.tsx:658:26)
+        at Routes (F:\myproject\frontend\node_modules\react-router\lib\components.tsx:512:3)
+        at AppRoutes
+        at Router (F:\myproject\frontend\node_modules\react-router\lib\components.tsx:421:13)
+        at MemoryRouter (F:\myproject\frontend\node_modules\react-router\lib\components.tsx:225:3)
+
+    [0m [90m 25 |[39m       })
+     [90m 26 |[39m       [33m.[39m[36mcatch[39m(() [33m=>[39m {
+    [31m[1m>[22m[39m[90m 27 |[39m         setError([32m'Failed to load bookings'[39m)[33m;[39m
+     [90m    |[39m         [31m[1m^[22m[39m
+     [90m 28 |[39m         setBookings([])[33m;[39m
+     [90m 29 |[39m       })
+     [90m 30 |[39m       [33m.[39m[36mfinally[39m(() [33m=>[39m setLoading([36mfalse[39m))[33m;[39m[0m
+
+      at printWarning (node_modules/react-dom/cjs/react-dom.development.js:86:30)
+      at error (node_modules/react-dom/cjs/react-dom.development.js:60:7)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom.development.js:27628:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom.development.js:25547:5)
+      at setError (node_modules/react-dom/cjs/react-dom.development.js:16708:7)
+      at src/pages/traveler/BookingHistoryPage.js:27:9
+
+  console.error
+    Warning: An update to BookingHistoryPage inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+        at BookingHistoryPage (F:\myproject\frontend\src\pages\traveler\BookingHistoryPage.js:12:43)
+        at RenderedRoute (F:\myproject\frontend\node_modules\react-router\lib\hooks.tsx:658:26)
+        at Outlet (F:\myproject\frontend\node_modules\react-router\lib\components.tsx:341:26)
+        at main
+        at div
+        at MainLayout (F:\myproject\frontend\src\layouts\MainLayout.js:10:31)
+        at RenderedRoute (F:\myproject\frontend\node_modules\react-router\lib\hooks.tsx:658:26)
+        at Outlet (F:\myproject\frontend\node_modules\react-router\lib\components.tsx:341:26)
+        at ProtectedRoute (F:\myproject\frontend\src\components\common\ProtectedRoute.js:8:31)
+        at RenderedRoute (F:\myproject\frontend\node_modules\react-router\lib\hooks.tsx:658:26)
+        at Routes (F:\myproject\frontend\node_modules\react-router\lib\components.tsx:512:3)
+        at AppRoutes
+        at Router (F:\myproject\frontend\node_modules\react-router\lib\components.tsx:421:13)
+        at MemoryRouter (F:\myproject\frontend\node_modules\react-router\lib\components.tsx:225:3)
+
+    [0m [90m 26 |[39m       [33m.[39m[36mcatch[39m(() [33m=>[39m {
+     [90m 27 |[39m         setError([32m'Failed to load bookings'[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 28 |[39m         setBookings([])[33m;[39m
+     [90m    |[39m         [31m[1m^[22m[39m
+     [90m 29 |[39m       })
+     [90m 30 |[39m       [33m.[39m[36mfinally[39m(() [33m=>[39m setLoading([36mfalse[39m))[33m;[39m
+     [90m 31 |[39m   }[33m,[39m [page])[33m;[39m[0m
+
+      at printWarning (node_modules/react-dom/cjs/react-dom.development.js:86:30)
+      at error (node_modules/react-dom/cjs/react-dom.development.js:60:7)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom.development.js:27628:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom.development.js:25547:5)
+      at setBookings (node_modules/react-dom/cjs/react-dom.development.js:16708:7)
+      at src/pages/traveler/BookingHistoryPage.js:28:9
+
+  console.error
+    Warning: An update to BookingHistoryPage inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+        at BookingHistoryPage (F:\myproject\frontend\src\pages\traveler\BookingHistoryPage.js:12:43)
+        at RenderedRoute (F:\myproject\frontend\node_modules\react-router\lib\hooks.tsx:658:26)
+        at Outlet (F:\myproject\frontend\node_modules\react-router\lib\components.tsx:341:26)
+        at main
+        at div
+        at MainLayout (F:\myproject\frontend\src\layouts\MainLayout.js:10:31)
+        at RenderedRoute (F:\myproject\frontend\node_modules\react-router\lib\hooks.tsx:658:26)
+        at Outlet (F:\myproject\frontend\node_modules\react-router\lib\components.tsx:341:26)
+        at ProtectedRoute (F:\myproject\frontend\src\components\common\ProtectedRoute.js:8:31)
+        at RenderedRoute (F:\myproject\frontend\node_modules\react-router\lib\hooks.tsx:658:26)
+        at Routes (F:\myproject\frontend\node_modules\react-router\lib\components.tsx:512:3)
+        at AppRoutes
+        at Router (F:\myproject\frontend\node_modules\react-router\lib\components.tsx:421:13)
+        at MemoryRouter (F:\myproject\frontend\node_modules\react-router\lib\components.tsx:225:3)
+
+    [0m [90m 28 |[39m         setBookings([])[33m;[39m
+     [90m 29 |[39m       })
+    [31m[1m>[22m[39m[90m 30 |[39m       [33m.[39m[36mfinally[39m(() [33m=>[39m setLoading([36mfalse[39m))[33m;[39m
+     [90m    |[39m                      [31m[1m^[22m[39m
+     [90m 31 |[39m   }[33m,[39m [page])[33m;[39m
+     [90m 32 |[39m
+     [90m 33 |[39m   [36mif[39m (loading) {[0m
+
+      at printWarning (node_modules/react-dom/cjs/react-dom.development.js:86:30)
+      at error (node_modules/react-dom/cjs/react-dom.development.js:60:7)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom.development.js:27628:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom.development.js:25547:5)
+      at setLoading (node_modules/react-dom/cjs/react-dom.development.js:16708:7)
+      at src/pages/traveler/BookingHistoryPage.js:30:22
+
+PASS src/__tests__/RouteConfig.test.js
+  Route Configuration ΓÇö REQ-053
+    ΓêÜ TEST-187: login route renders auth layout (225 ms)
+    ΓêÜ TEST-188: root route redirects authenticated users to search (52 ms)
+    ΓêÜ TEST-189: wildcard route redirects authenticated users to search (41 ms)
+    ΓêÜ TEST-190: admin routes are defined (2 ms)
+    ΓêÜ TEST-191: driver routes are defined (1 ms)
+    ΓêÜ TEST-192: agency routes are defined
+    ΓêÜ TEST-193: traveler routes render with auth (61 ms)
+
+Test Suites: 11 passed, 11 total
+Tests:       51 passed, 51 total
+Snapshots:   0 total
+Time:        15.112 s
+Ran all test suites.

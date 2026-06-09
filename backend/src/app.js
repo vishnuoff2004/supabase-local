@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const { errorHandler } = require('./middleware/errorHandler');
@@ -44,6 +45,13 @@ app.use('/api/reports', reportsRoutes);
 app.use('/api/metrics', require('./routes/metrics'));
 app.use('/api/announcements', require('./routes/announcements'));
 app.use('/api/events', require('./routes/events'));
+
+const frontendBuild = path.join(__dirname, '../../frontend/build');
+app.use(express.static(frontendBuild));
+
+app.get(/^\/(?!api\/).*/, (req, res) => {
+  res.sendFile(path.join(frontendBuild, 'index.html'));
+});
 
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });

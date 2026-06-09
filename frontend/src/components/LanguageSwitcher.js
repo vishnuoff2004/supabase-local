@@ -10,20 +10,24 @@ function LanguageSwitcher() {
   };
 
   return (
-    <div className="language-switcher">
+    <div className="language-switcher" role="radiogroup" aria-label={t('language.switcher.label') || 'Language selector'}>
       <button
         className={currentLang === 'en' ? 'active' : ''}
         onClick={() => switchLanguage('en')}
         aria-label={t('language.switcher.english')}
+        role="radio"
+        aria-checked={currentLang === 'en'}
       >
-        {t('language.switcher.english')}
+        EN
       </button>
       <button
         className={currentLang === 'hi' ? 'active' : ''}
         onClick={() => switchLanguage('hi')}
         aria-label={t('language.switcher.hindi')}
+        role="radio"
+        aria-checked={currentLang === 'hi'}
       >
-        {t('language.switcher.hindi')}
+        HI
       </button>
     </div>
   );

@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
       bookingId: { type: DataTypes.INTEGER, allowNull: false },
-      fromStatus: { type: DataTypes.STRING, allowNull: false },
+      fromStatus: { type: DataTypes.STRING, allowNull: true },
       toStatus: { type: DataTypes.STRING, allowNull: false },
       changedBy: { type: DataTypes.INTEGER, allowNull: true },
     },

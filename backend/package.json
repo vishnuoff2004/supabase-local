@@ -7,7 +7,13 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "test": "jest --forceExit --detectOpenHandles",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "migrate": "npx sequelize-cli db:migrate",
+    "migrate:undo": "npx sequelize-cli db:migrate:undo",
+    "migrate:undo:all": "npx sequelize-cli db:migrate:undo:all",
+    "seed": "npx sequelize-cli db:seed:all",
+    "seed:undo": "npx sequelize-cli db:seed:undo:all",
+    "db:reset": "npx sequelize-cli db:migrate:undo:all && npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all"
   },
   "dependencies": {
     "@socket.io/redis-adapter": "^8.3.0",
@@ -27,6 +33,7 @@
   "devDependencies": {
     "jest": "^29.7.0",
     "nodemon": "^3.1.0",
+    "sequelize-cli": "^6.6.5",
     "socket.io-client": "^4.8.3",
     "supertest": "^7.2.2"
   },

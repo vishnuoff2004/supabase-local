@@ -1,25 +1,56 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
+import DashboardStats from '../../components/DashboardStats';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
+import { ScrollReveal } from '../../hooks/useScrollAnimation';
 
 function AdminDashboardPage() {
   const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/dashboard/admin').then(res => setData(res.data)).catch(() => {});
+    api.get('/dashboard/admin')
+      .then(res => setData(res.data))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
-  if (!data) return <div>Loading...</div>;
+  if (loading) return <LoadingSpinner text="Loading dashboard..." />;
 
   return (
-    <div>
-      <h1>Admin Dashboard</h1>
-      <p>Total Users: {data.totalUsers}</p>
-      <p>Total Agencies: {data.totalAgencies}</p>
-      <p>Active Bookings: {data.totalActiveBookings}</p>
-      <h2>Status Breakdown</h2>
-      {data.bookingsByStatus && Object.entries(data.bookingsByStatus).map(([k, v]) => (
-        <p key={k}>{k}: {v}</p>
-      ))}
+    <div className="admin-page">
+      <div className="container">
+        <ScrollReveal className="animate-fade-up">
+          <div className="admin-header">
+            <div>
+              <h1 className="admin-title">Admin Dashboard</h1>
+              <p className="text-muted">Overview of your platform</p>
+            </div>
+          </div>
+        </ScrollReveal>
+
+        <DashboardStats fetchStats={() => api.get('/dashboard/admin').then(r => r.data)} />
+
+        {data?.bookingsByStatus && (
+          <ScrollReveal className="animate-fade-up">
+            <div className="dashboard-widget">
+              <div className="dashboard-widget-header">
+                <h3 className="dashboard-widget-title">Booking Status Breakdown</h3>
+              </div>
+              <div className="dashboard-widget-body">
+                <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))' }}>
+                  {Object.entries(data.bookingsByStatus).map(([k, v]) => (
+                    <div key={k} className="stat-card">
+                      <div className="stat-card-label">{k}</div>
+                      <div className="stat-card-value">{v}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </ScrollReveal>
+        )}
+      </div>
     </div>
   );
 }

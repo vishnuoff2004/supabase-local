@@ -33,9 +33,11 @@ function AnnouncementBanner() {
     <div className="announcement-banner-container">
       {visible.map(a => (
         <div key={a.id} className={`announcement-banner announcement-${a.type}`} role="alert">
-          <span className="announcement-title">{a.title}</span>
-          <span className="announcement-body">{a.body}</span>
-          <button onClick={() => dismiss(a.id)} aria-label={t('announcement.dismiss')}>
+          <span>
+            <strong className="announcement-title">{a.title}</strong>
+            <span className="announcement-body">{a.body}</span>
+          </span>
+          <button className="announcement-dismiss" onClick={() => dismiss(a.id)} aria-label={t('announcement.dismiss')}>
             {t('announcement.dismiss')}
           </button>
         </div>

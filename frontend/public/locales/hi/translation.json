@@ -8,7 +8,13 @@
     "analytics": "एनालिटिक्स",
     "events": "ईवेंट",
     "notifications": "सूचनाएं",
-    "logout": "लॉग आउट"
+    "logout": "लॉग आउट",
+    "search": "खोजें",
+    "routes": "रूट",
+    "requests": "अनुरोध",
+    "drivers": "ड्राइवर",
+    "agencies": "एजेंसियां",
+    "users": "उपयोगकर्ता"
   },
   "search": {
     "title": "रूट खोजें",

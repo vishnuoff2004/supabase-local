@@ -19,6 +19,15 @@ async function toggleUserStatus(req, res, next) {
   }
 }
 
+async function getAgencies(req, res, next) {
+  try {
+    const agencies = await adminService.getAgencies();
+    res.json(agencies);
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function createAgency(req, res, next) {
   try {
     const agency = await adminService.createAgency(req.user.id, req.body);
@@ -70,6 +79,7 @@ async function cancelBooking(req, res, next) {
 module.exports = {
   getUsers,
   toggleUserStatus,
+  getAgencies,
   createAgency,
   updateAgency,
   deactivateAgency,

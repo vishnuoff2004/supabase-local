@@ -1,4 +1,4 @@
-const { Booking, Driver, User, Agency, Sequelize } = require('../models');
+const { Booking, Driver, User, Agency, Route, Sequelize } = require('../models');
 const { Op } = Sequelize;
 
 async function getUserDashboard(req, res, next) {
@@ -27,8 +27,12 @@ async function getDriverDashboard(req, res, next) {
     if (!driver) {
       return res.status(404).json({ message: 'Driver profile not found' });
     }
-    const pendingRequests = await Booking.count({
+    const pendingData = await Booking.findAll({
       where: { driverId: driver.id, status: 'Pending' },
+      include: [
+        { model: User, attributes: ['name'] },
+        { model: Route, attributes: ['source', 'destination'] },
+      ],
     });
     const activeTrips = await Booking.count({
       where: { driverId: driver.id, status: { [Op.in]: ['Confirmed', 'On Trip'] } },
@@ -36,7 +40,16 @@ async function getDriverDashboard(req, res, next) {
     const todayTrips = await Booking.findAll({
       where: { driverId: driver.id, travelDate: new Date().toISOString().split('T')[0] },
     });
-    res.json({ pendingRequests, activeTrips, todayTrips });
+    res.json({
+      pendingRequests: pendingData.length,
+      pendingRequestsList: pendingData.map(b => ({
+        id: b.id,
+        travelerName: b.User ? b.User.name : null,
+        route: b.Route ? `${b.Route.source} → ${b.Route.destination}` : null,
+      })),
+      activeTrips,
+      todayTrips,
+    });
   } catch (err) {
     next(err);
   }

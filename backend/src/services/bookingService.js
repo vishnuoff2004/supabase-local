@@ -67,7 +67,7 @@ async function createBooking(userId, data) {
 
   await BookingStatusHistory.create({
     bookingId: booking.id,
-    fromStatus: null,
+    fromStatus: 'Pending',
     toStatus: 'Pending',
     changedBy: userId,
   });

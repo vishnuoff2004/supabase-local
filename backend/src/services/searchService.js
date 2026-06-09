@@ -44,11 +44,11 @@ async function searchRoutes(source, destination) {
     fare: route.fare,
     capacity: route.capacity,
     available: route.available,
-    driverId: route.Driver.id,
-    driverName: route.Driver.name,
-    vehicleType: route.Driver.vehicleType,
-    agencyId: route.Driver.Agency.id,
-    agencyName: route.Driver.Agency.name,
+    driverId: route.Driver?.id ?? null,
+    driverName: route.Driver?.name ?? null,
+    vehicleType: route.Driver?.vehicleType ?? null,
+    agencyId: route.Driver?.Agency?.id ?? null,
+    agencyName: route.Driver?.Agency?.name ?? null,
   }));
 
   await cache.set(cacheKey, data, SEARCH_CACHE_TTL);

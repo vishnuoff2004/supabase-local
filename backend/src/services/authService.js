@@ -38,7 +38,7 @@ async function login(email, password) {
   }
 
   if (user.lockedUntil && new Date(user.lockedUntil) > new Date()) {
-    const err = new Error('Account locked. Try again after 15 minutes');
+    const err = new Error('Account locked. Try again after 15 seconds');
     err.status = 429;
     throw err;
   }
@@ -47,7 +47,7 @@ async function login(email, password) {
   if (!valid) {
     user.loginAttempts = (user.loginAttempts || 0) + 1;
     if (user.loginAttempts >= 5) {
-      user.lockedUntil = new Date(Date.now() + 15 * 60 * 1000);
+      user.lockedUntil = new Date(Date.now() + 15 * 1000);
     }
     await user.save();
     const err = new Error('Invalid email or password');

@@ -8,9 +8,10 @@ const sequelize = new Sequelize(config.database, config.username, config.passwor
   pool: config.pool,
 });
 
-sequelize.authenticate()
-  .then(() => console.log('MySQL connected'))
-  .catch(err => console.error('MySQL connection error:', err.message));
+sequelize
+  .authenticate()
+  .then(() => console.log('MySQL connected successfully'))
+  .catch((err) => console.error('MySQL connection failed:', err.message));
 
 const db = {};
 

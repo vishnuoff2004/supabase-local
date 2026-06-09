@@ -24,6 +24,7 @@ function metricsMiddleware(req, res, next) {
 }
 
 function sanitizeRoute(route) {
+  if (typeof route !== 'string') return 'unknown';
   return route.replace(/\/[0-9]+/g, '/:id');
 }
 

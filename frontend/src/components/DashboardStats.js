@@ -1,4 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import { SkeletonStats } from './common/SkeletonLoader';
+
+const icons = {
+  totalUsers: '👥',
+  totalAgencies: '🏢',
+  totalActiveBookings: '📋',
+  pendingRequests: '⏳',
+  activeTrips: '🚗',
+  totalDrivers: '👤',
+  totalBookings: '📊',
+  revenue: '💰',
+  completedTrips: '✅',
+};
 
 export default function DashboardStats({ fetchStats, interval = 30000 }) {
   const [stats, setStats] = useState(null);
@@ -29,7 +42,7 @@ export default function DashboardStats({ fetchStats, interval = 30000 }) {
   }, [fetchStats, interval]);
 
   if (loading) {
-    return <div className="dashboard-stats dashboard-stats--loading" aria-busy="true">Loading stats...</div>;
+    return <SkeletonStats count={4} />;
   }
 
   if (!stats) {
@@ -37,13 +50,18 @@ export default function DashboardStats({ fetchStats, interval = 30000 }) {
   }
 
   return (
-    <div className="dashboard-stats" role="region" aria-label="Dashboard statistics" aria-live="polite">
-      {Object.entries(stats).map(([key, value]) => (
-        <div key={key} className="dashboard-stats__card">
-          <span className="dashboard-stats__label">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
-          <span className="dashboard-stats__value">{value ?? 0}</span>
-        </div>
-      ))}
+    <div className="stats-grid" role="region" aria-label="Dashboard statistics" aria-live="polite">
+      {Object.entries(stats).filter(([, v]) => typeof v !== 'object').map(([key, value]) => {
+        const label = key.replace(/([A-Z])/g, ' $1').trim();
+        const icon = icons[key] || '📊';
+        return (
+          <div key={key} className="stat-card">
+            <div className="stat-card-icon">{icon}</div>
+            <div className="stat-card-label">{label}</div>
+            <div className="stat-card-value">{value ?? 0}</div>
+          </div>
+        );
+      })}
     </div>
   );
 }

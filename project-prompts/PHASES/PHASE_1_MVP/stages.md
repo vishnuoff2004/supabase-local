@@ -30,8 +30,8 @@
 - Create `backend/src/config/database.js` with Sequelize connection using environment variables
 - Create Sequelize models: User (id, name, email unique, bcrypt password, phone, role enum, active, loginAttempts, lockedUntil), Agency (id, name, email unique, phone, active, createdBy FK), Driver (id, userId FK unique, agencyId FK, name, phone, vehicleType enum, vehicleReg unique, licenseNo, available), Route (id, driverId FK, source, destination, departureTime, arrivalTime, fare DECIMAL 10,2, capacity INT 1-60, available), Booking (id, userId FK, routeId FK, driverId FK, seatCount, travelDate, status enum, cancelReason, cancelledBy FK), BookingStatusHistory (id, bookingId FK, fromStatus, toStatus, changedBy FK)
 - Define model associations (User↔Driver, Agency→Drivers, Driver→Routes, Driver→Bookings, Booking→StatusHistory) and initialize Sequelize with all models
-- Create `database/init.sql` with CREATE DATABASE, sync models with `sequelize.sync({ alter: true })`, add indexes on routes(source, destination), routes(driverId), bookings(userId, status, travelDate), bookings(driverId, status, travelDate), booking_status_history(bookingId), users(email) unique, drivers(vehicleReg) unique, drivers(userId) unique
-- Create `database/seed.sql` with 2 agencies, 4 drivers, 4 routes, 1 admin user
+<!-- - Create `database/init.sql` with CREATE DATABASE, sync models with `sequelize.sync({ alter: true })`, add indexes on routes(source, destination), routes(driverId), bookings(userId, status, travelDate), bookings(driverId, status, travelDate), booking_status_history(bookingId), users(email) unique, drivers(vehicleReg) unique, drivers(userId) unique
+- Create `database/seed.sql` with 2 agencies, 4 drivers, 4 routes, 1 admin user -->
 
 ## STAGE 4: Auth
 **REQ-IDs:** REQ-001, REQ-002, REQ-003, REQ-004, REQ-028, REQ-032

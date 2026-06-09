@@ -8,7 +8,13 @@
     "analytics": "Analytics",
     "events": "Events",
     "notifications": "Notifications",
-    "logout": "Logout"
+    "logout": "Logout",
+    "search": "Search",
+    "routes": "Routes",
+    "requests": "Requests",
+    "drivers": "Drivers",
+    "agencies": "Agencies",
+    "users": "Users"
   },
   "search": {
     "title": "Search Routes",

@@ -57,9 +57,7 @@ async function removeDriver(userId, driverId) {
 async function getDrivers(userId, page = 1, limit = 20) {
   const agency = await Agency.findOne({ where: { createdBy: userId } });
   if (!agency) {
-    const err = new Error('Agency not found');
-    err.status = 404;
-    throw err;
+    return { data: [], page, limit, totalPages: 0, totalItems: 0 };
   }
   const offset = (page - 1) * limit;
   const { count, rows } = await Driver.findAndCountAll({
@@ -73,9 +71,7 @@ async function getDrivers(userId, page = 1, limit = 20) {
 async function getBookings(userId, filters = {}) {
   const agency = await Agency.findOne({ where: { createdBy: userId } });
   if (!agency) {
-    const err = new Error('Agency not found');
-    err.status = 404;
-    throw err;
+    return { data: [] };
   }
   const driverIds = await Driver.findAll({ where: { agencyId: agency.id }, attributes: ['id'] });
   const ids = driverIds.map(d => d.id);

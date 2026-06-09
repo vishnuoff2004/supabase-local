@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
+import Button from '../../components/common/Button';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
+import { ScrollReveal } from '../../hooks/useScrollAnimation';
+import { SkeletonList } from '../../components/common/SkeletonLoader';
 
 function NotificationCenterPage() {
   const { t } = useTranslation();
@@ -36,36 +40,90 @@ function NotificationCenterPage() {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
   };
 
+  const unreadCount = notifications.filter(n => !n.isRead).length;
+
+  if (loading && page === 1) {
+    return (
+      <div className="notification-center">
+        <div className="container">
+          <h1 className="admin-title mb-lg">{t('notification.title')}</h1>
+          <SkeletonList rows={6} />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div>
-      <h1>{t('notification.title')}</h1>
-      {notifications.length > 0 && (
-        <button onClick={markAllRead}>{t('notification.markAllRead')}</button>
-      )}
-      {loading && <div>{t('common.loading')}</div>}
-      {!loading && notifications.length === 0 && <p>{t('notification.noNotifications')}</p>}
-      {!loading && notifications.map(n => (
-        <div
-          key={n.id}
-          className={`notification-item ${n.isRead ? '' : 'notification-unread'}`}
-          onClick={() => !n.isRead && markRead(n.id)}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => { if (e.key === 'Enter' && !n.isRead) markRead(n.id); }}
-        >
-          <strong>{n.title}</strong>
-          <p>{n.body}</p>
-          <small>{new Date(n.createdAt).toLocaleString()}</small>
-          {!n.isRead && <span className="unread-badge">{t('notification.unread')}</span>}
-        </div>
-      ))}
-      {totalPages > 1 && (
-        <div className="pagination">
-          <button disabled={page <= 1} onClick={() => setPage(p => p - 1)}>{t('common.previous')}</button>
-          <span>{t('common.page')} {page} {t('common.of')} {totalPages}</span>
-          <button disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>{t('common.next')}</button>
-        </div>
-      )}
+    <div className="notification-center">
+      <div className="container">
+        <ScrollReveal className="animate-fade-up">
+          <div className="notification-center-header">
+            <div>
+              <h1 className="admin-title">{t('notification.title')}</h1>
+              {unreadCount > 0 && (
+                <p className="text-muted">{unreadCount} unread</p>
+              )}
+            </div>
+            {notifications.length > 0 && (
+              <Button variant="outline" size="sm" onClick={markAllRead}>
+                {t('notification.markAllRead')}
+              </Button>
+            )}
+          </div>
+        </ScrollReveal>
+
+        {!loading && notifications.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-state-icon">🔔</div>
+            <h3 className="empty-state-title">{t('notification.noNotifications')}</h3>
+            <p className="empty-state-text">You're all caught up!</p>
+          </div>
+        ) : (
+          <div className="notification-list">
+            {notifications.map(n => (
+              <ScrollReveal key={n.id} className="animate-fade-up">
+                <div
+                  className={`notification-item ${n.isRead ? '' : 'notification-unread'}`}
+                  onClick={() => !n.isRead && markRead(n.id)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter' && !n.isRead) markRead(n.id); }}
+                >
+                  <div className="notification-item-icon">
+                    {n.isRead ? '📩' : '📬'}
+                  </div>
+                  <div className="notification-item-content">
+                    <div className="notification-item-title">{n.title}</div>
+                    <div className="notification-item-body">{n.body}</div>
+                    <div className="notification-item-time">{new Date(n.createdAt).toLocaleString()}</div>
+                  </div>
+                  {!n.isRead && <div className="notification-unread-dot" />}
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+        )}
+
+        {totalPages > 1 && (
+          <nav className="pagination" aria-label="Notification pagination">
+            <button
+              className="pagination-btn"
+              disabled={page <= 1}
+              onClick={() => setPage(p => p - 1)}
+            >
+              ‹
+            </button>
+            <span className="pagination-info">{t('common.page')} {page} {t('common.of')} {totalPages}</span>
+            <button
+              className="pagination-btn"
+              disabled={page >= totalPages}
+              onClick={() => setPage(p => p + 1)}
+            >
+              ›
+            </button>
+          </nav>
+        )}
+      </div>
     </div>
   );
 }
