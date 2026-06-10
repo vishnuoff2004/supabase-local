@@ -4,6 +4,7 @@ module.exports = (sequelize, DataTypes) => {
   class Agency extends Model {
     static associate(models) {
       Agency.hasMany(models.Driver, { foreignKey: 'agencyId' });
+      Agency.belongsTo(models.User, { foreignKey: 'adminId', as: 'admin' });
     }
   }
 
@@ -15,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
       phone: { type: DataTypes.STRING, allowNull: false },
       active: { type: DataTypes.BOOLEAN, defaultValue: true },
       createdBy: { type: DataTypes.INTEGER, allowNull: false },
+      adminId: { type: DataTypes.INTEGER, allowNull: true },
     },
     { sequelize, modelName: 'Agency', timestamps: true }
   );

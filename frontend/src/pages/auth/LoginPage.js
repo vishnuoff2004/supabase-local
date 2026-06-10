@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import Button from '../../components/common/Button';
 
@@ -18,6 +19,7 @@ const demoCredentials = [
 ];
 
 function LoginPage() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -28,9 +30,9 @@ function LoginPage() {
 
   React.useEffect(() => {
     if (searchParams.get('sessionExpired')) {
-      setError('Session expired. Please login again.');
+      setError(t('auth.sessionExpired'));
     }
-  }, [searchParams]);
+  }, [searchParams, t]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -42,7 +44,7 @@ function LoginPage() {
       const route = roleRoutes[role] || '/search';
       navigate(route);
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      setError(err.response?.data?.message || t('auth.loginFailed'));
     } finally {
       setLoading(false);
     }
@@ -60,19 +62,19 @@ function LoginPage() {
         <div className="auth-logo">
           <span className="auth-logo-icon">TP</span>
         </div>
-        <h1 className="auth-title">Welcome Back</h1>
-        <p className="auth-subtitle">Sign in to your TravelPro account</p>
+        <h1 className="auth-title">{t('auth.welcomeBack')}</h1>
+        <p className="auth-subtitle">{t('auth.signIn')}</p>
 
         {error && <div className="auth-error" role="alert">{error}</div>}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label className="form-label" htmlFor="login-email">Email</label>
+            <label className="form-label" htmlFor="login-email">{t('auth.email')}</label>
             <input
               id="login-email"
               className="form-input"
               type="email"
-              placeholder="you@example.com"
+              placeholder={t('auth.emailPlaceholder')}
               value={email}
               onChange={e => setEmail(e.target.value)}
               required
@@ -80,28 +82,28 @@ function LoginPage() {
             />
           </div>
           <div className="form-group">
-            <label className="form-label" htmlFor="login-password">Password</label>
+            <label className="form-label" htmlFor="login-password">{t('auth.password')}</label>
             <input
               id="login-password"
               className="form-input"
               type="password"
-              placeholder="Enter your password"
+              placeholder={t('auth.passwordPlaceholder')}
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
             />
           </div>
           <Button type="submit" loading={loading} className="w-full" size="lg">
-            Sign In
+            {t('auth.signInButton')}
           </Button>
         </form>
 
         <div className="auth-footer" style={{ marginTop: 16 }}>
-          Don't have an account? <Link to="/register">Create one</Link>
+          {t('auth.dontHaveAccount')} <Link to="/register">{t('auth.createOne')}</Link>
         </div>
 
         <details style={{ marginTop: 20, fontSize: '0.82rem', color: 'var(--color-text-muted)' }}>
-          <summary style={{ cursor: 'pointer', fontWeight: 600 }}>Demo Accounts</summary>
+          <summary style={{ cursor: 'pointer', fontWeight: 600 }}>{t('auth.demoAccounts')}</summary>
           <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
             {demoCredentials.map(d => (
               <button

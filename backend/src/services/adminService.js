@@ -24,7 +24,13 @@ async function getAgencies() {
 }
 
 async function createAgency(adminId, data) {
-  const agency = await Agency.create({ ...data, createdBy: adminId });
+  const agency = await Agency.create({
+    name: data.name,
+    email: data.email,
+    phone: data.phone,
+    createdBy: adminId,
+    adminId: data.adminId || null,
+  });
   return agency;
 }
 
@@ -51,26 +57,28 @@ async function deactivateAgency(adminId, agencyId) {
     err.status = 404;
     throw err;
   }
-  agency.active = false;
+  agency.active = !agency.active;
   await agency.save();
 
-  const driverIds = await Driver.findAll({ where: { agencyId }, attributes: ['id'] });
-  const ids = driverIds.map(d => d.id);
+  if (!agency.active) {
+    const driverIds = await Driver.findAll({ where: { agencyId }, attributes: ['id'] });
+    const ids = driverIds.map(d => d.id);
 
-  const pendingBookings = await Booking.findAll({
-    where: { driverId: { [Op.in]: ids }, status: 'Pending' },
-  });
-  for (const booking of pendingBookings) {
-    const prevStatus = booking.status;
-    booking.status = 'Cancelled';
-    booking.cancelReason = 'Agency deactivated';
-    await booking.save();
-    await BookingStatusHistory.create({
-      bookingId: booking.id,
-      fromStatus: prevStatus,
-      toStatus: 'Cancelled',
-      changedBy: adminId,
+    const pendingBookings = await Booking.findAll({
+      where: { driverId: { [Op.in]: ids }, status: 'Pending' },
     });
+    for (const booking of pendingBookings) {
+      const prevStatus = booking.status;
+      booking.status = 'Cancelled';
+      booking.cancelReason = 'Agency deactivated';
+      await booking.save();
+      await BookingStatusHistory.create({
+        bookingId: booking.id,
+        fromStatus: prevStatus,
+        toStatus: 'Cancelled',
+        changedBy: adminId,
+      });
+    }
   }
 
   return agency;

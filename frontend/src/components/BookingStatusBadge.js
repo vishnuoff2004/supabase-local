@@ -5,6 +5,8 @@ const statusMap = {
   confirmed: 'badge-confirmed',
   'in-progress': 'badge-in-progress',
   in_progress: 'badge-in-progress',
+  'on trip': 'badge-in-progress',
+  'on_trip': 'badge-in-progress',
   completed: 'badge-completed',
   cancelled: 'badge-cancelled',
   rejected: 'badge-rejected',

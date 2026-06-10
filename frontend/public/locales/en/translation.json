@@ -81,7 +81,7 @@
   "language": {
     "switcher": {
       "english": "English",
-      "hindi": "Hindi"
+      "tamil": "Tamil"
     }
   },
   "common": {
@@ -108,5 +108,31 @@
     "noData": "No booking data available.",
     "date": "Date",
     "bookings": "Bookings"
+  },
+  "driver": {
+    "dashboard": "Driver Dashboard",
+    "routes": "Route Management",
+    "requests": "Booking Requests"
+  },
+  "agency": {
+    "dashboard": "Agency Dashboard",
+    "drivers": "Driver Management",
+    "requests": "Driver Requests",
+    "bookings": "Booking Monitor"
+  },
+  "admin": {
+    "dashboard": "Admin Dashboard",
+    "users": "User Management",
+    "agencies": "Agency Management",
+    "bookings": "Booking Monitor"
+  },
+  "error": {
+    "unauthorized": "Access Denied",
+    "unauthorizedMsg": "You don't have permission to access this page.",
+    "yourRole": "Your Current Role:",
+    "yourUserId": "Your User ID:",
+    "goToDashboard": "Go to Dashboard",
+    "goBack": "Go Back",
+    "contact": "If you believe this is an error, please contact your administrator."
   }
 }

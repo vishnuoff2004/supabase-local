@@ -1,4 +1,4 @@
-const { Booking, BookingStatusHistory, Route, Driver, Sequelize } = require('../models');
+const { Booking, BookingStatusHistory, Route, Driver, Agency, Sequelize } = require('../models');
 const { Op } = Sequelize;
 
 function getValidTransitions() {
@@ -17,6 +17,7 @@ function isValidTransition(from, to) {
 }
 
 async function createBooking(userId, data) {
+  // Rule 1: Prevent duplicate booking for exact same route/driver/date
   const existing = await Booking.findOne({
     where: {
       userId,
@@ -28,6 +29,23 @@ async function createBooking(userId, data) {
   });
   if (existing) {
     const err = new Error('You already have a booking for this route on this date');
+    err.status = 409;
+    throw err;
+  }
+
+  // Rule 2: Prevent booking on a date that already has an active trip
+  const sameDateBooking = await Booking.findOne({
+    where: {
+      userId,
+      travelDate: data.travelDate,
+      status: { [Op.notIn]: ['Cancelled', 'Completed'] },
+    },
+  });
+  if (sameDateBooking) {
+    const err = new Error(
+      `You already have an active booking on ${data.travelDate}. ` +
+      `Please complete or cancel your existing trip before booking another on the same date.`
+    );
     err.status = 409;
     throw err;
   }
@@ -99,6 +117,13 @@ async function getBookingById(userId, bookingId) {
     include: [
       {
         model: BookingStatusHistory,
+      },
+      {
+        model: Route,
+      },
+      {
+        model: Driver,
+        include: [{ model: Agency }],
       },
     ],
   });

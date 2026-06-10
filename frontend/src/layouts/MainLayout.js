@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
-import LanguageSwitcher from '../components/LanguageSwitcher';
+import LanguageSwitcher from '../components/common/LanguageSwitcher';
 
 function MainLayout() {
   const { t } = useTranslation();
@@ -58,6 +58,7 @@ function MainLayout() {
           <>
             <Link className={`navbar-link ${isActive('/agency/dashboard') ? 'active' : ''}`} to="/agency/dashboard">{t('nav.dashboard')}</Link>
             <Link className={`navbar-link ${isActive('/agency/drivers') ? 'active' : ''}`} to="/agency/drivers">{t('nav.drivers') || 'Drivers'}</Link>
+            <Link className={`navbar-link ${isActive('/agency/requests') ? 'active' : ''}`} to="/agency/requests">Driver Requests</Link>
             <Link className={`navbar-link ${isActive('/agency/bookings') ? 'active' : ''}`} to="/agency/bookings">{t('nav.bookings')}</Link>
             <Link className={`navbar-link ${isActive('/analytics') ? 'active' : ''}`} to="/analytics">{t('nav.analytics')}</Link>
           </>

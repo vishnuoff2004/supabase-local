@@ -12,5 +12,9 @@ router.put('/bookings/:id/accept', authorize('driver', 'admin'), driverControlle
 router.put('/bookings/:id/reject', authorize('driver', 'admin'), driverController.rejectBooking);
 router.put('/bookings/:id/status', authorize('driver', 'admin'), driverController.updateTripStatus);
 router.put('/availability', authorize('driver', 'admin'), driverController.setAvailability);
+router.get('/agency-status', authorize('driver', 'admin'), driverController.getMyAgencyStatus);
+router.get('/agencies', authorize('driver', 'admin'), driverController.listAgencies);
+router.post('/agency-request', authorize('driver', 'admin'), driverController.sendJoinRequest);
+router.delete('/agency-request', authorize('driver', 'admin'), driverController.cancelJoinRequest);
 
 module.exports = router;

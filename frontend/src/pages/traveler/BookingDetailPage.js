@@ -75,6 +75,125 @@ function BookingDetailPage() {
               </div>
             </div>
             <div className="booking-detail-body">
+              {/* Info Grid */}
+              <div className="booking-info-grid">
+                {/* 1. Trip Information Card */}
+                {booking.Route ? (
+                  <div className="detail-section-card">
+                    <h3 className="detail-section-title">
+                      <span>📍</span> Trip Information
+                    </h3>
+                    <div className="detail-field-group">
+                      <div className="detail-field">
+                        <span className="detail-label">Route</span>
+                        <span className="detail-value font-semibold">
+                          {booking.Route.source} → {booking.Route.destination}
+                        </span>
+                      </div>
+                      <div className="detail-field">
+                        <span className="detail-label">Departure</span>
+                        <span className="detail-value">
+                          {new Date(booking.Route.departureTime).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="detail-field">
+                        <span className="detail-label">Arrival</span>
+                        <span className="detail-value">
+                          {new Date(booking.Route.arrivalTime).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="detail-field">
+                        <span className="detail-label">Fare per Seat</span>
+                        <span className="detail-value">₹{booking.Route.fare}</span>
+                      </div>
+                      <div className="detail-field">
+                        <span className="detail-label">Total Amount</span>
+                        <span className="detail-value text-accent font-bold" style={{ fontSize: '1.15rem' }}>
+                          ₹{(Number(booking.Route.fare) * booking.seatCount).toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="detail-section-card">
+                    <h3 className="detail-section-title">
+                      <span>📍</span> Trip Information
+                    </h3>
+                    <p className="text-muted">Route details unavailable</p>
+                  </div>
+                )}
+
+                {/* 2. Driver & Vehicle Card */}
+                {booking.Driver ? (
+                  <div className="detail-section-card">
+                    <h3 className="detail-section-title">
+                      <span>👤</span> Driver & Vehicle
+                    </h3>
+                    <div className="detail-field-group">
+                      <div className="detail-field">
+                        <span className="detail-label">Driver Name</span>
+                        <span className="detail-value font-semibold">{booking.Driver.name}</span>
+                      </div>
+                      <div className="detail-field">
+                        <span className="detail-label">Driver Contact</span>
+                        <span className="detail-value">{booking.Driver.phone}</span>
+                      </div>
+                      <div className="detail-field">
+                        <span className="detail-label">Vehicle Type</span>
+                        <span className="detail-value">{booking.Driver.vehicleType || 'N/A'}</span>
+                      </div>
+                      <div className="detail-field">
+                        <span className="detail-label">Vehicle Reg. No</span>
+                        <span className="detail-value font-mono">{booking.Driver.vehicleReg || 'N/A'}</span>
+                      </div>
+                      <div className="detail-field">
+                        <span className="detail-label">License Number</span>
+                        <span className="detail-value font-mono">{booking.Driver.licenseNo || 'N/A'}</span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="detail-section-card">
+                    <h3 className="detail-section-title">
+                      <span>👤</span> Driver & Vehicle
+                    </h3>
+                    <p className="text-muted">Driver details unavailable</p>
+                  </div>
+                )}
+
+                {/* 3. Agency Details Card */}
+                {booking.Driver?.Agency ? (
+                  <div className="detail-section-card">
+                    <h3 className="detail-section-title">
+                      <span>🏢</span> Service Provider
+                    </h3>
+                    <div className="detail-field-group">
+                      <div className="detail-field">
+                        <span className="detail-label">Agency Name</span>
+                        <span className="detail-value font-semibold">
+                          {booking.Driver.Agency.name}
+                        </span>
+                      </div>
+                      <div className="detail-field">
+                        <span className="detail-label">Agency Contact</span>
+                        <span className="detail-value">{booking.Driver.Agency.phone}</span>
+                      </div>
+                      <div className="detail-field">
+                        <span className="detail-label">Agency Email</span>
+                        <span className="detail-value">{booking.Driver.Agency.email}</span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="detail-section-card">
+                    <h3 className="detail-section-title">
+                      <span>🏢</span> Service Provider
+                    </h3>
+                    <p className="text-muted">Agency details unavailable</p>
+                  </div>
+                )}
+              </div>
+
               {['Pending', 'Confirmed'].includes(booking.status) && (
                 <div className="booking-detail-actions">
                   <Button variant="danger" onClick={handleCancel} loading={cancelling}>

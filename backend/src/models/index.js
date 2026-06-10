@@ -24,6 +24,7 @@ db.BookingStatusHistory = require('./BookingStatusHistory')(sequelize, Sequelize
 db.Notification = require('./Notification')(sequelize, Sequelize.DataTypes);
 db.Announcement = require('./Announcement')(sequelize, Sequelize.DataTypes);
 db.Event = require('./Event')(sequelize, Sequelize.DataTypes);
+db.DriverAgencyRequest = require('./DriverAgencyRequest')(sequelize, Sequelize.DataTypes);
 
 Object.keys(db).forEach(modelName => {
   if (db[modelName].associate) {

@@ -8,7 +8,7 @@ function RoleRoute({ roles, children }) {
 
   if (loading) return <LoadingSpinner text="Verifying access..." />;
   if (!user || !roles.includes(user.role)) {
-    return <Navigate to="/search" replace />;
+    return <Navigate to="/unauthorized" replace />;
   }
 
   return children;

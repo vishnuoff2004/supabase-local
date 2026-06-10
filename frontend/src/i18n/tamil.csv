@@ -1,0 +1,105 @@
+Key,English,Tamil
+nav.home,Search,தேடல்
+nav.bookings,My Bookings,என் முன்பதிவுகள்
+nav.admin,Admin,நிர்வாகம்
+nav.agency,Agency,நிறுவனம்
+nav.dashboard,Dashboard,வாரியம்
+nav.analytics,Analytics,பகுப்பாய்வு
+nav.events,Events,நிகழ்வுகள்
+nav.notifications,Notifications,அறிவிப்புகள்
+nav.logout,Logout,வெளியேறு
+nav.search,Search,தேடல்
+nav.routes,Routes,வழிகள்
+nav.requests,Requests,கோரிக்கைகள்
+nav.drivers,Drivers,ஓட்டுனர்கள்
+nav.agencies,Agencies,நிறுவனங்கள்
+nav.users,Users,பயனர்கள்
+search.title,Search Routes,வழிகளைத் தேடுக
+search.from,From,இருந்து
+search.to,To,வரை
+search.search,Search,தேடுக
+search.searching,Searching...,தேடுகிறது...
+search.startTyping,Start typing to search routes.,வழிகளைத் தேடுவதற்கு தட்டச்சு செய்யத் தொடங்கவும்.
+search.results,Results,முடிவுகள்
+search.fare,Fare,கட்டணம்
+search.vehicle,Vehicle,வாகனம்
+search.driver,Driver,ஓட்டுனர்
+search.agency,Agency,நிறுவனம்
+search.book,Book,முன்பதிவு செய்க
+booking.title,My Bookings,என் முன்பதிவுகள்
+booking.new,New Booking,புதிய முன்பதிவு
+booking.detail,Booking Detail,முன்பதிவு விவரம்
+booking.history,Booking History,முன்பதிவு வரலாறு
+booking.status.pending,Pending,நிலுவையில் உள்ள
+booking.status.confirmed,Confirmed,உறுதிப்படுத்தப்பட்ட
+booking.status.onTrip,On Trip,பயணத்தில்
+booking.status.completed,Completed,முடிந்தது
+booking.status.cancelled,Cancelled,ரத்து செய்யப்பட்ட
+booking.cancel,Cancel Booking,முன்பதிவை ரத்து செய்க
+booking.cancelConfirm,Are you sure you want to cancel this booking?,இந்த முன்பதிவை ரத்து செய்ய விரும்பினால் உறுதிப்படுத்தவும்.
+booking.noBookings,No bookings found.,முன்பதிவுகள் கிடைக்கவில்லை.
+booking.seatCount,Seats,இருக்கைகள்
+booking.travelDate,Travel Date,பயண தேதி
+booking.route,Route,வழி
+booking.totalFare,Total Fare,மொத்த கட்டணம்
+auth.login,Login,உள்நுழைக
+auth.register,Register,பதிவு செய்க
+auth.email,Email,மின்னஞ்சல்
+auth.password,Password,கடவுச்சொல்
+auth.name,Name,பெயர்
+auth.phone,Phone,தொலைபேசி
+auth.logout,Logout,வெளியேறு
+auth.loginSuccess,Logged in successfully,வெற்றிகரமாக உள்நுழைந்தீர்கள்
+auth.registerSuccess,Registered successfully,வெற்றிகரமாக பதிவுசெய்யப்பட்டீர்கள்
+announcement.title,Announcements,அறிவிப்புகள்
+announcement.dismiss,Dismiss,நிராகரி
+announcement.noAnnouncements,No announcements.,அறிவிப்புகள் இல்லை.
+events.title,Upcoming Events,வரவிருக்கும் நிகழ்வுகள்
+events.noUpcoming,No upcoming events.,வரவிருக்கும் நிகழ்வுகள் இல்லை.
+events.location,Location,இடம்
+events.dateRange,Date Range,தேதி வரம்பு
+notification.title,Notifications,அறிவிப்புகள்
+notification.markAllRead,Mark All as Read,அனைத்தையும் படித்ததாக குறிக்கவும்
+notification.noNotifications,No notifications.,அறிவிப்புகள் இல்லை.
+notification.unread,Unread,படிக்கப்படாத
+language.switcher.english,English,ஆங்கிலம்
+language.switcher.tamil,Tamil,தமிழ்
+common.loading,Loading...,ஏற்றுவதில் உள்ளது...
+common.error,An error occurred,பிழை ஏற்பட்டது
+common.save,Save,சேமி
+common.cancel,Cancel,ரத்து செய்க
+common.confirm,Confirm,உறுதிப்படுத்தவும்
+common.delete,Delete,நீக்கு
+common.edit,Edit,திருத்து
+common.create,Create,உருவாக்கு
+common.filter,Filter,வடிகட்டி
+common.clear,Clear,தெளிவு
+common.page,Page,பக்கம்
+common.of,of,இல்
+common.previous,Previous,முந்தைய
+common.next,Next,அடுத்த
+analytics.title,Bookings Analytics,முன்பதிவு பகுப்பாய்வு
+analytics.startDate,Start Date,தொடக்க தேதி
+analytics.endDate,End Date,முடிவு தேதி
+analytics.filter,Filter,வடிகட்டி
+analytics.noData,No booking data available.,முன்பதிவு தரவு கிடைக்கவில்லை.
+analytics.date,Date,தேதி
+analytics.bookings,Bookings,முன்பதிவுகள்
+driver.dashboard,Driver Dashboard,ஓட்டுனர் வாரியம்
+driver.routes,Route Management,வழி மேலாண்மை
+driver.requests,Booking Requests,முன்பதிவு கோரிக்கைகள்
+agency.dashboard,Agency Dashboard,நிறுவன வாரியம்
+agency.drivers,Driver Management,ஓட்டுனர் மேலாண்மை
+agency.requests,Driver Requests,ஓட்டுனர் கோரிக்கைகள்
+agency.bookings,Booking Monitor,முன்பதிவு மனிட்டர்
+admin.dashboard,Admin Dashboard,நிர்வாக வாரியம்
+admin.users,User Management,பயனர் மேலாண்மை
+admin.agencies,Agency Management,நிறுவன மேலாண்மை
+admin.bookings,Booking Oversight,முன்பதிவு மனிட்டர்
+error.unauthorized,Access Denied,அணுக மறுக்கப்பட்டது
+error.unauthorizedMsg,You don't have permission to access this page.,இந்த பக்கத்தை அணுக உங்களுக்கு அனுமதி இல்லை.
+error.yourRole,Your Current Role:,உங்கள் தற்போதைய பங்கு:
+error.yourUserId,Your User ID:,உங்கள் பயனர் ID:
+error.goToDashboard,Go to Dashboard,வாரியத்திற்குச் செல்லவும்
+error.goBack,Go Back,திரும்பு
+error.contact,If you believe this is an error, please contact your administrator.,இது பிழை என நம்பினால், உங்கள் நிர்வாகியைத் தொடர்பு கொள்ளவும்.

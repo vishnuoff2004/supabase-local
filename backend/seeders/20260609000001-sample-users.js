@@ -9,6 +9,7 @@ module.exports = {
 
     await queryInterface.bulkInsert('Users', [
       {
+        id: 1,
         name: 'Admin User',
         email: 'admin123@gmail.com',
         password: adminHash,
@@ -21,6 +22,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
+        id: 2,
         name: 'Agency Admin',
         email: 'agency@example.com',
         password: hash,
@@ -33,6 +35,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
+        id: 3,
         name: 'Driver User',
         email: 'driver@example.com',
         password: hash,
@@ -45,6 +48,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
+        id: 4,
         name: 'Traveler One',
         email: 'traveler@example.com',
         password: hash,
@@ -57,6 +61,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
+        id: 5,
         name: 'Traveler Two',
         email: 'traveler2@example.com',
         password: hash,
@@ -69,6 +74,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
+        id: 6,
         name: 'Ramesh Kumar',
         email: 'ramesh@example.com',
         password: hash,

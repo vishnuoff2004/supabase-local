@@ -1,3 +1,4 @@
+const { Agency } = require('../models');
 const searchService = require('../services/searchService');
 
 async function search(req, res, next) {
@@ -10,4 +11,13 @@ async function search(req, res, next) {
   }
 }
 
-module.exports = { search };
+async function listAgencies(req, res, next) {
+  try {
+    const agencies = await Agency.findAll({ where: { active: true }, attributes: ['id', 'name', 'email'] });
+    res.json(agencies);
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { search, listAgencies };

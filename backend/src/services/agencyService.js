@@ -1,8 +1,40 @@
 const { Driver, Booking, User, Route, Agency, Sequelize } = require('../models');
 const { Op } = Sequelize;
 
+async function getOrCreateAgency(userId) {
+  let agency = await Agency.findOne({ where: { adminId: userId } });
+  if (!agency) {
+    const user = await User.findByPk(userId);
+    if (user && user.role === 'agency_admin') {
+      try {
+        agency = await Agency.create({
+          name: `${user.name}'s Agency`,
+          email: user.email,
+          phone: user.phone,
+          createdBy: user.id,
+          adminId: user.id,
+        });
+      } catch (err) {
+        if (err.name === 'SequelizeUniqueConstraintError') {
+          const uniqueEmail = `agency_${user.id}_${Date.now()}@example.com`;
+          agency = await Agency.create({
+            name: `${user.name}'s Agency`,
+            email: uniqueEmail,
+            phone: user.phone,
+            createdBy: user.id,
+            adminId: user.id,
+          });
+        } else {
+          throw err;
+        }
+      }
+    }
+  }
+  return agency;
+}
+
 async function addDriver(userId, driverId) {
-  const agency = await Agency.findOne({ where: { createdBy: userId } });
+  const agency = await getOrCreateAgency(userId);
   if (!agency) {
     const err = new Error('Agency not found');
     err.status = 404;
@@ -25,7 +57,7 @@ async function addDriver(userId, driverId) {
 }
 
 async function removeDriver(userId, driverId) {
-  const agency = await Agency.findOne({ where: { createdBy: userId } });
+  const agency = await getOrCreateAgency(userId);
   if (!agency) {
     const err = new Error('Agency not found');
     err.status = 404;
@@ -55,21 +87,29 @@ async function removeDriver(userId, driverId) {
 }
 
 async function getDrivers(userId, page = 1, limit = 20) {
-  const agency = await Agency.findOne({ where: { createdBy: userId } });
+  const agency = await getOrCreateAgency(userId);
   if (!agency) {
-    return { data: [], page, limit, totalPages: 0, totalItems: 0 };
+    return { agencyName: null, data: [], page, limit, totalPages: 0, totalItems: 0 };
   }
   const offset = (page - 1) * limit;
   const { count, rows } = await Driver.findAndCountAll({
     where: { agencyId: agency.id },
+    attributes: ['id', 'name', 'phone', 'vehicleType', 'vehicleReg', 'licenseNo', 'available'],
     limit,
     offset,
   });
-  return { data: rows, page, limit, totalPages: Math.ceil(count / limit), totalItems: count };
+  return {
+    agencyName: agency.name,
+    data: rows,
+    page,
+    limit,
+    totalPages: Math.ceil(count / limit),
+    totalItems: count,
+  };
 }
 
 async function getBookings(userId, filters = {}) {
-  const agency = await Agency.findOne({ where: { createdBy: userId } });
+  const agency = await getOrCreateAgency(userId);
   if (!agency) {
     return { data: [] };
   }

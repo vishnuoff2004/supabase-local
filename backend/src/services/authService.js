@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-const { User } = require('../models');
+const { User, Driver, Agency } = require('../models');
 const { generateToken } = require('../utils/jwt');
 
 async function register(data) {
@@ -18,6 +18,28 @@ async function register(data) {
     phone: data.phone,
     role: data.role || 'traveler',
   });
+
+  if (user.role === 'driver') {
+    await Driver.create({
+      userId: user.id,
+      name: data.name,
+      phone: data.phone,
+      vehicleType: data.vehicleType || null,
+      vehicleReg: data.vehicleReg || null,
+      licenseNo: data.licenseNo || null,
+      agencyId: data.agencyId || null,
+    });
+  }
+
+  if (user.role === 'agency_admin') {
+    await Agency.create({
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      createdBy: user.id,
+      adminId: user.id,
+    });
+  }
 
   const { password, ...userWithoutPassword } = user.toJSON();
   return userWithoutPassword;

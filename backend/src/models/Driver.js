@@ -14,15 +14,15 @@ module.exports = (sequelize, DataTypes) => {
     {
       id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
       userId: { type: DataTypes.INTEGER, allowNull: false, unique: true },
-      agencyId: { type: DataTypes.INTEGER, allowNull: false },
+      agencyId: { type: DataTypes.INTEGER, allowNull: true },
       name: { type: DataTypes.STRING, allowNull: false },
       phone: { type: DataTypes.STRING, allowNull: false },
       vehicleType: {
         type: DataTypes.ENUM('Sedan', 'SUV', 'Hatchback', 'Van', 'Bus'),
-        allowNull: false,
+        allowNull: true,
       },
-      vehicleReg: { type: DataTypes.STRING, allowNull: false, unique: true },
-      licenseNo: { type: DataTypes.STRING, allowNull: false },
+      vehicleReg: { type: DataTypes.STRING, allowNull: true, unique: true },
+      licenseNo: { type: DataTypes.STRING, allowNull: true },
       available: { type: DataTypes.BOOLEAN, defaultValue: true },
     },
     { sequelize, modelName: 'Driver', timestamps: true }

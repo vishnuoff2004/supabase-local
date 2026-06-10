@@ -1,4 +1,5 @@
 const agencyService = require('../services/agencyService');
+const agencyRequestService = require('../services/agencyRequestService');
 
 async function addDriver(req, res, next) {
   try {
@@ -44,4 +45,25 @@ async function getBookings(req, res, next) {
   }
 }
 
-module.exports = { addDriver, removeDriver, getDrivers, getBookings };
+async function getDriverRequests(req, res, next) {
+  try {
+    const requests = await agencyRequestService.getAgencyRequests(req.user.id);
+    res.json(requests);
+  } catch (err) { next(err); }
+}
+
+async function respondToDriverRequest(req, res, next) {
+  try {
+    const { action } = req.body; // 'accept' or 'deny'
+    if (!['accept', 'deny'].includes(action)) {
+      return res.status(400).json({ message: 'Action must be accept or deny' });
+    }
+    const result = await agencyRequestService.respondToRequest(req.user.id, req.params.id, action);
+    res.json(result);
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ message: err.message });
+    next(err);
+  }
+}
+
+module.exports = { addDriver, removeDriver, getDrivers, getBookings, getDriverRequests, respondToDriverRequest };

@@ -6,16 +6,21 @@ import { ScrollReveal } from '../../hooks/useScrollAnimation';
 
 function AgencyManagementPage() {
   const [agencies, setAgencies] = useState([]);
+  const [agencyAdmins, setAgencyAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({ name: '', email: '', phone: '' });
+  const [form, setForm] = useState({ name: '', email: '', phone: '', adminId: '' });
   const [creating, setCreating] = useState(false);
   const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
-    api.get('/admin/agencies')
-      .then(res => setAgencies(res.data || []))
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    Promise.all([
+      api.get('/admin/agencies'),
+      api.get('/admin/users'),
+    ]).then(([agenciesRes, usersRes]) => {
+      setAgencies(agenciesRes.data || []);
+      setAgencyAdmins((usersRes.data || []).filter(u => u.role === 'agency_admin'));
+    }).catch(() => {})
+    .finally(() => setLoading(false));
   }, []);
 
   const handleCreate = async (e) => {
@@ -23,7 +28,7 @@ function AgencyManagementPage() {
     setCreating(true);
     try {
       await api.post('/admin/agencies', form);
-      setForm({ name: '', email: '', phone: '' });
+      setForm({ name: '', email: '', phone: '', adminId: '' });
       setShowForm(false);
       const res = await api.get('/admin/agencies');
       setAgencies(res.data || []);
@@ -34,10 +39,10 @@ function AgencyManagementPage() {
     }
   };
 
-  const handleDeactivate = async (id) => {
+  const handleToggleActive = async (id, isActive) => {
     try {
       await api.put(`/admin/agencies/${id}/deactivate`);
-      setAgencies(prev => prev.map(a => a.id === id ? { ...a, active: false } : a));
+      setAgencies(prev => prev.map(a => a.id === id ? { ...a, active: !isActive } : a));
     } catch (err) {
       alert(err.response?.data?.message || 'Failed');
     }
@@ -94,6 +99,19 @@ function AgencyManagementPage() {
                       required
                     />
                   </div>
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <select
+                      className="form-input"
+                      value={form.adminId}
+                      onChange={e => setForm(prev => ({ ...prev, adminId: e.target.value }))}
+                      required
+                    >
+                      <option value="">Select Agency Admin</option>
+                      {agencyAdmins.map(u => (
+                        <option key={u.id} value={u.id}>{u.name} ({u.email})</option>
+                      ))}
+                    </select>
+                  </div>
                   <div className="form-group">
                     <Button type="submit" loading={creating}>Create</Button>
                   </div>
@@ -135,11 +153,13 @@ function AgencyManagementPage() {
                         </span>
                       </td>
                       <td>
-                        {a.active !== false && (
-                          <Button variant="danger" size="sm" onClick={() => handleDeactivate(a.id)}>
-                            Deactivate
-                          </Button>
-                        )}
+                        <Button
+                          variant={a.active !== false ? 'danger' : 'secondary'}
+                          size="sm"
+                          onClick={() => handleToggleActive(a.id, a.active !== false)}
+                        >
+                          {a.active !== false ? 'Deactivate' : 'Activate'}
+                        </Button>
                       </td>
                     </tr>
                   ))}

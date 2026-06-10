@@ -30,7 +30,8 @@ async function searchRoutes(source, destination) {
     include: [
       {
         model: Driver,
-        include: [{ model: Agency, where: { active: true } }],
+        required: true,
+        include: [{ model: Agency, where: { active: true }, required: true }],
       },
     ],
   });

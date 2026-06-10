@@ -4,6 +4,7 @@ module.exports = {
   up: async (queryInterface) => {
     await queryInterface.bulkInsert('Drivers', [
       {
+        id: 1,
         userId: 3,
         agencyId: 1,
         name: 'Driver User',
@@ -16,6 +17,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
+        id: 2,
         userId: 6,
         agencyId: 2,
         name: 'Ramesh Kumar',

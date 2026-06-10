@@ -35,11 +35,20 @@ async function updateProfile(userId, data) {
 }
 
 async function createRoute(userId, data) {
-  const driver = await Driver.findOne({ where: { userId } });
+  let driver = await Driver.findOne({ where: { userId } });
   if (!driver) {
-    const err = new Error('Driver profile not found');
-    err.status = 404;
-    throw err;
+    const user = await User.findByPk(userId);
+    if (!user) {
+      const err = new Error('Driver profile not found');
+      err.status = 404;
+      throw err;
+    }
+    driver = await Driver.create({
+      userId,
+      name: user.name,
+      phone: user.phone,
+      agencyId: null,
+    });
   }
 
   if (data.source === data.destination) {
@@ -210,6 +219,25 @@ async function updateTripStatus(driverUserId, bookingId, newStatus) {
     const err = new Error(`Cannot transition to ${newStatus} from ${booking.status}`);
     err.status = 400;
     throw err;
+  }
+
+  // Rule: Driver cannot start a new trip while already on an active trip
+  if (newStatus === 'On Trip') {
+    const activeTrip = await Booking.findOne({
+      where: {
+        driverId: driver.id,
+        status: 'On Trip',
+        id: { [Op.ne]: booking.id },
+      },
+    });
+    if (activeTrip) {
+      const err = new Error(
+        'You already have an active trip in progress (Booking #' + activeTrip.id + '). ' +
+        'Please complete it before starting another trip.'
+      );
+      err.status = 409;
+      throw err;
+    }
   }
 
   const prevStatus = booking.status;

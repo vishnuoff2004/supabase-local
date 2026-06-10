@@ -18,6 +18,7 @@ module.exports = {
 
     await queryInterface.bulkInsert('Routes', [
       {
+        id: 1,
         driverId: 1,
         source: 'Bangalore',
         destination: 'Mysore',
@@ -30,6 +31,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
+        id: 2,
         driverId: 1,
         source: 'Bangalore',
         destination: 'Chennai',
@@ -42,6 +44,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
+        id: 3,
         driverId: 2,
         source: 'Mumbai',
         destination: 'Pune',

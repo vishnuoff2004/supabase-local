@@ -1,13 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../../services/api';
 import Button from '../../components/common/Button';
 
 function RegisterPage() {
-  const [form, setForm] = useState({ name: '', email: '', password: '', phone: '', role: 'traveler' });
+  const [form, setForm] = useState({ name: '', email: '', password: '', phone: '', role: 'traveler', vehicleType: '', vehicleReg: '', licenseNo: '', agencyId: '' });
+  const [agencies, setAgencies] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    api.get('/routes/agencies').then(r => setAgencies(Array.isArray(r.data) ? r.data : [])).catch(() => {});
+  }, []);
 
   const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
@@ -104,6 +109,70 @@ function RegisterPage() {
               <option value="agency_admin">Agency Admin</option>
             </select>
           </div>
+
+          {form.role === 'driver' && (
+            <>
+              <div className="form-group">
+                <label className="form-label" htmlFor="reg-vehicleType">Vehicle Type</label>
+                <select
+                  id="reg-vehicleType"
+                  className="form-select"
+                  name="vehicleType"
+                  value={form.vehicleType}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select Vehicle Type</option>
+                  <option value="Sedan">Sedan</option>
+                  <option value="SUV">SUV</option>
+                  <option value="Hatchback">Hatchback</option>
+                  <option value="Van">Van</option>
+                  <option value="Bus">Bus</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label" htmlFor="reg-vehicleReg">Vehicle Registration</label>
+                <input
+                  id="reg-vehicleReg"
+                  className="form-input"
+                  name="vehicleReg"
+                  placeholder="KA-01-AB-1234"
+                  value={form.vehicleReg}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label" htmlFor="reg-licenseNo">License Number</label>
+                <input
+                  id="reg-licenseNo"
+                  className="form-input"
+                  name="licenseNo"
+                  placeholder="DL-123456789"
+                  value={form.licenseNo}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label" htmlFor="reg-agencyId">Agency</label>
+                <select
+                  id="reg-agencyId"
+                  className="form-select"
+                  name="agencyId"
+                  value={form.agencyId}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select Agency</option>
+                  {agencies.map(a => (
+                    <option key={a.id} value={a.id}>{a.name}</option>
+                  ))}
+                </select>
+              </div>
+            </>
+          )}
+
           <Button type="submit" loading={loading} className="w-full" size="lg">
             Create Account
           </Button>

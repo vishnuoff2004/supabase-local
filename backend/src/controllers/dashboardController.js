@@ -25,29 +25,49 @@ async function getDriverDashboard(req, res, next) {
   try {
     const driver = await Driver.findOne({ where: { userId: req.user.id } });
     if (!driver) {
-      return res.status(404).json({ message: 'Driver profile not found' });
+      return res.json({
+        pendingRequests: 0,
+        pendingRequestsList: [],
+        activeTrips: 0,
+        activeTripsList: [],
+        pastTripsList: [],
+        todayTrips: [],
+      });
     }
-    const pendingData = await Booking.findAll({
-      where: { driverId: driver.id, status: 'Pending' },
+
+    const allBookings = await Booking.findAll({
+      where: { driverId: driver.id },
       include: [
         { model: User, attributes: ['name'] },
-        { model: Route, attributes: ['source', 'destination'] },
+        { model: Route, attributes: ['source', 'destination', 'departureTime', 'arrivalTime'] },
       ],
+      order: [['createdAt', 'DESC']],
     });
-    const activeTrips = await Booking.count({
-      where: { driverId: driver.id, status: { [Op.in]: ['Confirmed', 'On Trip'] } },
+
+    const formatBooking = b => ({
+      id: b.id,
+      travelerName: b.User ? b.User.name : null,
+      route: b.Route ? `${b.Route.source} → ${b.Route.destination}` : null,
+      travelDate: b.travelDate,
+      status: b.status,
+      departureTime: b.Route ? b.Route.departureTime : null,
+      arrivalTime: b.Route ? b.Route.arrivalTime : null,
+      seatCount: b.seatCount,
     });
-    const todayTrips = await Booking.findAll({
-      where: { driverId: driver.id, travelDate: new Date().toISOString().split('T')[0] },
-    });
+
+    const pendingRequestsList = allBookings.filter(b => b.status === 'Pending').map(formatBooking);
+    const activeTripsList = allBookings.filter(b => ['Confirmed', 'On Trip'].includes(b.status)).map(formatBooking);
+    const pastTripsList = allBookings.filter(b => ['Completed', 'Cancelled'].includes(b.status)).map(formatBooking);
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    const todayTrips = allBookings.filter(b => b.travelDate === todayStr).map(formatBooking);
+
     res.json({
-      pendingRequests: pendingData.length,
-      pendingRequestsList: pendingData.map(b => ({
-        id: b.id,
-        travelerName: b.User ? b.User.name : null,
-        route: b.Route ? `${b.Route.source} → ${b.Route.destination}` : null,
-      })),
-      activeTrips,
+      pendingRequests: pendingRequestsList.length,
+      pendingRequestsList,
+      activeTrips: activeTripsList.length,
+      activeTripsList,
+      pastTripsList,
       todayTrips,
     });
   } catch (err) {

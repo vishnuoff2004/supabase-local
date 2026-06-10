@@ -8,6 +8,7 @@ module.exports = {
 
     await queryInterface.bulkInsert('Bookings', [
       {
+        id: 1,
         userId: 4,
         routeId: 1,
         driverId: 1,
@@ -20,6 +21,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
+        id: 2,
         userId: 5,
         routeId: 1,
         driverId: 1,
@@ -32,6 +34,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
+        id: 3,
         userId: 4,
         routeId: 2,
         driverId: 1,
@@ -44,6 +47,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
+        id: 4,
         userId: 5,
         routeId: 3,
         driverId: 2,

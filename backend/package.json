@@ -16,6 +16,8 @@
     "db:reset": "npx sequelize-cli db:migrate:undo:all && npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all"
   },
   "dependencies": {
+    "@sentry/node": "^10.57.0",
+    "@sentry/tracing": "^7.120.4",
     "@socket.io/redis-adapter": "^8.3.0",
     "bcrypt": "^5.1.1",
     "bullmq": "^5.78.0",
