@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import Button from '../../components/common/Button';
+import PriceRangeSlider from '../../components/common/PriceRangeSlider';
 import { ScrollReveal } from '../../hooks/useScrollAnimation';
 import { SkeletonCard } from '../../components/common/SkeletonLoader';
 
@@ -20,8 +21,10 @@ function SearchPage() {
   const [source, setSource] = useState('');
   const [destination, setDestination] = useState('');
   const [seats, setSeats] = useState('');
-  const [priceMin, setPriceMin] = useState('');
-  const [priceMax, setPriceMax] = useState('');
+  const [priceRange, setPriceRange] = useState([0, 10000]);
+  const [draftSeats, setDraftSeats] = useState('');
+  const [draftPriceRange, setDraftPriceRange] = useState([0, 10000]);
+  const [showFilters, setShowFilters] = useState(false);
   const [vehicleTypes, setVehicleTypes] = useState([]);
   const [facetCounts, setFacetCounts] = useState(null);
   const [results, setResults] = useState([]);
@@ -29,10 +32,32 @@ function SearchPage() {
   const debouncedSource = useDebounce(source, 300);
   const debouncedDestination = useDebounce(destination, 300);
   const debouncedSeats = useDebounce(seats, 300);
-  const debouncedPriceMin = useDebounce(priceMin, 300);
-  const debouncedPriceMax = useDebounce(priceMax, 300);
+  const debouncedPriceRange = useDebounce(priceRange, 300);
   const navigate = useNavigate();
   const hasFetched = useRef(false);
+  const filterBtnRef = useRef(null);
+  const [popupPos, setPopupPos] = useState({ top: 0, left: 0 });
+
+  const updatePopupPos = useCallback(() => {
+    if (!filterBtnRef.current) return;
+    const rect = filterBtnRef.current.getBoundingClientRect();
+    const popupW = 280;
+    let left = rect.right - popupW - 35;
+    if (left < 12) left = 12;
+    if (left + popupW > window.innerWidth - 12) left = window.innerWidth - popupW - 12;
+    setPopupPos({ top: rect.bottom + 6, left });
+  }, []);
+
+  useEffect(() => {
+    if (!showFilters) return;
+    updatePopupPos();
+    window.addEventListener('scroll', updatePopupPos, true);
+    window.addEventListener('resize', updatePopupPos);
+    return () => {
+      window.removeEventListener('scroll', updatePopupPos, true);
+      window.removeEventListener('resize', updatePopupPos);
+    };
+  }, [showFilters, updatePopupPos]);
 
   const toggleVehicleType = (type) => {
     setVehicleTypes(prev =>
@@ -56,8 +81,8 @@ function SearchPage() {
           destination: debouncedDestination,
         };
         if (debouncedSeats) params.seats = debouncedSeats;
-        if (debouncedPriceMin) params.priceMin = debouncedPriceMin;
-        if (debouncedPriceMax) params.priceMax = debouncedPriceMax;
+        if (debouncedPriceRange[0] > 0) params.priceMin = debouncedPriceRange[0];
+        if (debouncedPriceRange[1] < 10000) params.priceMax = debouncedPriceRange[1];
         if (vehicleTypes.length > 0) params.vehicleTypes = vehicleTypes.join(',');
         const res = await api.get('/routes/search', { params });
         if (!cancelled) {
@@ -74,7 +99,7 @@ function SearchPage() {
       }
     })();
     return () => { cancelled = true; };
-  }, [debouncedSource, debouncedDestination, debouncedSeats, debouncedPriceMin, debouncedPriceMax, vehicleTypes]);
+  }, [debouncedSource, debouncedDestination, debouncedSeats, debouncedPriceRange, vehicleTypes]);
 
   return (
     <div className="search-page">
@@ -102,11 +127,27 @@ function SearchPage() {
               onChange={e => setDestination(e.target.value)}
               aria-label={t('search.to') || 'Destination'}
             />
+            <div className="search-filters-dropdown">
+              <button
+                ref={filterBtnRef}
+                className={`search-filters-btn${showFilters ? ' is-active' : ''}${(seats || priceRange[0] > 0 || priceRange[1] < 10000) ? ' has-filters' : ''}`}
+                onClick={() => setShowFilters(p => !p)}
+                aria-label="Filters"
+              >
+                <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
+                  <path d="M2 4h12M4 8h8M6 12h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+                {(seats || priceRange[0] > 0 || priceRange[1] < 10000) && <span className="search-filters-badge" />}
+              </button>
+            </div>
           </div>
         </ScrollReveal>
 
-        <ScrollReveal className="animate-fade-up">
-          <div className="search-filters">
+        {showFilters && (
+          <div className="search-filters-overlay" onClick={() => setShowFilters(false)} />
+        )}
+        {showFilters && (
+          <div className="search-filters-popup" style={{ top: popupPos.top, left: popupPos.left }}>
             <div className="search-filter-group">
               <label className="search-filter-label">{t('search.seats') || 'Seats'}</label>
               <input
@@ -114,37 +155,44 @@ function SearchPage() {
                 type="number"
                 min="1"
                 placeholder={t('search.seatsPlaceholder') || 'Min seats'}
-                value={seats}
-                onChange={e => setSeats(e.target.value)}
+                value={draftSeats}
+                onChange={e => setDraftSeats(e.target.value)}
                 aria-label={t('search.seats') || 'Seats'}
               />
             </div>
-            <div className="search-filter-group">
-              <label className="search-filter-label">{t('search.minPrice') || 'Min Price'}</label>
-              <input
-                className="form-input"
-                type="number"
-                min="0"
-                placeholder="₹0"
-                value={priceMin}
-                onChange={e => setPriceMin(e.target.value)}
-                aria-label={t('search.minPrice') || 'Min Price'}
-              />
-            </div>
-            <div className="search-filter-group">
-              <label className="search-filter-label">{t('search.maxPrice') || 'Max Price'}</label>
-              <input
-                className="form-input"
-                type="number"
-                min="0"
-                placeholder="₹10000"
-                value={priceMax}
-                onChange={e => setPriceMax(e.target.value)}
-                aria-label={t('search.maxPrice') || 'Max Price'}
-              />
+            <PriceRangeSlider
+              min={0}
+              max={10000}
+              step={100}
+              value={draftPriceRange}
+              onChange={setDraftPriceRange}
+            />
+            <div className="search-filters-popup__actions">
+              <button
+                className="btn btn-outline btn-sm"
+                onClick={() => {
+                  setDraftSeats('');
+                  setDraftPriceRange([0, 10000]);
+                  setSeats('');
+                  setPriceRange([0, 10000]);
+                  setShowFilters(false);
+                }}
+              >
+                Clear
+              </button>
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={() => {
+                  setSeats(draftSeats);
+                  setPriceRange(draftPriceRange);
+                  setShowFilters(false);
+                }}
+              >
+                Apply
+              </button>
             </div>
           </div>
-        </ScrollReveal>
+        )}
 
         {facetCounts && facetCounts.vehicleType && Object.keys(facetCounts.vehicleType).length > 0 && (
           <ScrollReveal className="animate-fade-up">

@@ -8,6 +8,7 @@ import { NotificationProvider } from './contexts/NotificationContext';
 import { SocketProvider } from './contexts/SocketContext';
 import { BookingProvider } from './contexts/BookingContext';
 import AnnouncementBanner from './components/AnnouncementBanner';
+import PwaUpdatePrompt from './components/common/PwaUpdatePrompt';
 import './styles/design-system.css';
 
 function ScrollToTop() {
@@ -30,6 +31,7 @@ function App() {
                 <Sentry.ErrorBoundary fallback={<ErrorFallback />} showDialog>
                   <AnnouncementBanner />
                   <AppRoutes />
+                  <PwaUpdatePrompt />
                 </Sentry.ErrorBoundary>
               </BookingProvider>
             </SocketProvider>

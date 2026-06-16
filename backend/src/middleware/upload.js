@@ -81,13 +81,9 @@ const handleUploads = (req, res, next) => {
         { 'Content-Type': rcFile.mimetype }
       );
 
-      // Build the public URLs using localhost:9000 (MinIO API endpoint)
-      const port = process.env.MINIO_PORT || '9000';
-      const endpoint = process.env.MINIO_ENDPOINT || 'localhost';
-      const protocol = process.env.MINIO_USE_SSL === 'true' ? 'https' : 'http';
-
-      req.licenseDocUrl = `${protocol}://${endpoint}:${port}/${BUCKET_NAME}/${licenseFilename}`;
-      req.vehicleRcUrl = `${protocol}://${endpoint}:${port}/${BUCKET_NAME}/${rcFilename}`;
+      // Use relative paths so images work from any host (localhost, tunnel, etc.)
+      req.licenseDocUrl = `/api/images/${licenseFilename}`;
+      req.vehicleRcUrl = `/api/images/${rcFilename}`;
 
       next();
     } catch (uploadError) {

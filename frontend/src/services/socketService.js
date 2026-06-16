@@ -1,6 +1,22 @@
 import { io } from 'socket.io-client';
 
-const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || 'http://localhost:5000';
+function getSocketUrl() {
+  const explicitUrl = process.env.REACT_APP_SOCKET_URL;
+  if (explicitUrl) return explicitUrl;
+
+  const apiUrl = process.env.REACT_APP_API_URL;
+  if (apiUrl) {
+    try {
+      const url = new URL(apiUrl);
+      return `${url.protocol}//${url.host}`;
+    } catch {
+      return 'http://localhost:5000';
+    }
+  }
+  return 'http://localhost:5000';
+}
+
+const SOCKET_URL = getSocketUrl();
 
 class SocketManager {
   constructor() {

@@ -1,0 +1,35 @@
+{
+  "name": "TravelPro - Premium Travel Agency Platform",
+  "short_name": "TravelPro",
+  "description": "Premium travel agency platform for seamless booking and route management",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0D530E",
+  "theme_color": "#0D530E",
+  "orientation": "portrait-primary",
+  "categories": ["travel", "business"],
+  "lang": "en",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false
+}

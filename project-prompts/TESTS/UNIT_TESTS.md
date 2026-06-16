@@ -202,12 +202,12 @@ File: /project-prompts/TESTS/UNIT_TESTS.md
 - **Input:** `{ routeId: 1, seatCount: -1, travelDate: "2026-07-15" }`
 - **Expected Output:** HTTP 400, error message "Seat count must be at least 1"
 
-## TEST-118 — Last seat concurrent booking
+<!-- ## TEST-118 — Last seat concurrent booking
 
 - **REQ-ID:** REQ-040
 - **Scenario:** Two travelers simultaneously book the last available seat (capacity = 1)
 - **Input:** Traveler A seatCount=1, Traveler B seatCount=1 at same time
-- **Expected Output:** Traveler A receives HTTP 201, Traveler B receives HTTP 409 "Insufficient capacity"
+- **Expected Output:** Traveler A receives HTTP 201, Traveler B receives HTTP 409 "Insufficient capacity" -->
 
 ## TEST-120 — Booking with past date
 

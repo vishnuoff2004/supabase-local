@@ -1,5 +1,6 @@
 const path = require('path');
 const express = require('express');
+const http = require('http');
 const cors = require('cors');
 const { errorHandler } = require('./middleware/errorHandler');
 const { authenticate } = require('./middleware/auth');
@@ -46,8 +47,41 @@ app.use('/api/metrics', require('./routes/metrics'));
 app.use('/api/announcements', require('./routes/announcements'));
 app.use('/api/events', require('./routes/events'));
 
+const { minioClient, BUCKET_NAME } = require('./config/minio');
+
+app.get('/api/images/*', async (req, res) => {
+  const objectPath = req.params[0];
+  if (!objectPath) return res.status(400).json({ message: 'Image path required' });
+
+  try {
+    const stream = await minioClient.getObject(BUCKET_NAME, objectPath);
+    const ext = path.extname(objectPath).toLowerCase();
+    const mimeTypes = { '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.pdf': 'application/pdf' };
+    res.setHeader('Content-Type', mimeTypes[ext] || 'application/octet-stream');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    stream.pipe(res);
+  } catch (err) {
+    if (err.code === 'NotFound') return res.status(404).json({ message: 'Image not found' });
+    console.error('MinIO proxy error:', err);
+    res.status(500).json({ message: 'Failed to retrieve image' });
+  }
+});
+
 const frontendBuild = path.join(__dirname, '../../frontend/build');
-app.use(express.static(frontendBuild));
+
+app.use(express.static(frontendBuild, {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('service-worker.js')) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      res.setHeader('Service-Worker-Allowed', '/');
+    }
+    if (filePath.endsWith('manifest.json')) {
+      res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+    }
+  },
+}));
 
 app.get(/^\/(?!api\/).*/, (req, res) => {
   res.sendFile(path.join(frontendBuild, 'index.html'));
