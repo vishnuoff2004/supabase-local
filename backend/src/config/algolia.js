@@ -81,6 +81,12 @@ if (appId && apiKey) {
         console.log(`Algolia search/facet settings applied successfully to index: ${INDEX_BOOKINGS}`);
       } catch (settingsErr) {
         console.error(`Failed to apply Algolia index settings:`, settingsErr.message);
+        // Retry settings after 5s
+        setTimeout(() => {
+          applySettings().catch(e =>
+            console.error('Retry applying Algolia settings failed:', e.message)
+          );
+        }, 5000);
       }
     };
 

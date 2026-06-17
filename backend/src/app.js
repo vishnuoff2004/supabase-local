@@ -31,6 +31,19 @@ app.use(rateLimiter);
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+app.post('/api/echo', (req, res) => {
+  res.json({ received: req.body, method: 'POST', ok: true });
+});
+app.get('/api/test-login', async (req, res) => {
+  const { email, password } = req.query;
+  if (!email || !password) return res.status(400).json({ error: 'email and password required' });
+  try {
+    const data = await require('./services/authService').login(email, password);
+    res.json({ ok: true, user: data.user, token: data.token?.slice(0,20)+'...' });
+  } catch (e) {
+    res.json({ ok: false, message: e.message });
+  }
+});
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);

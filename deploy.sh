@@ -10,5 +10,5 @@ sleep 15
 echo "Services status:"
 docker-compose ps
 echo ""
-echo "Backend: http://localhost:5000/api/health"
+echo "Backend: http://localhost:8080/api/health"
 echo "Frontend: http://localhost:80"

@@ -34,7 +34,11 @@ export function AuthProvider({ children }) {
       setUser(res.data.user);
       return res.data;
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      const msg = err.response?.data?.message
+        || err.message
+        || 'Login failed';
+      console.error('Login error:', err?.response?.status, err?.response?.data, err?.message);
+      setError(msg);
       throw err;
     }
   }, []);

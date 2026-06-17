@@ -1,6 +1,19 @@
 const { Route, Driver, Agency, User, Booking } = require('../models');
 const { getAlgoliaClient, INDEX_NAME, INDEX_USERS, INDEX_AGENCIES, INDEX_BOOKINGS } = require('../config/algolia');
 
+async function retry(fn, retries = 3, delay = 1000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (i === retries - 1) throw err;
+      console.warn(`Algolia retry ${i + 1}/${retries} failed: ${err.message}. Retrying in ${delay}ms...`);
+      await new Promise(r => setTimeout(r, delay));
+      delay *= 2;
+    }
+  }
+}
+
 // Formatters for indexing
 async function getRouteIndexObject(routeId) {
   const route = await Route.findByPk(routeId, {
@@ -118,7 +131,7 @@ async function syncRouteToAlgolia(routeId) {
   try {
     const obj = await getRouteIndexObject(routeId);
     if (obj) {
-      await client.saveObject({ indexName: INDEX_NAME, body: obj });
+      await retry(() => client.saveObject({ indexName: INDEX_NAME, body: obj }));
       console.log(`Synced route ${routeId} to Algolia.`);
     }
   } catch (err) {
@@ -131,7 +144,7 @@ async function deleteRouteFromAlgolia(routeId) {
   if (!client) return;
 
   try {
-    await client.deleteObject({ indexName: INDEX_NAME, objectID: routeId.toString() });
+    await retry(() => client.deleteObject({ indexName: INDEX_NAME, objectID: routeId.toString() }));
     console.log(`Deleted route ${routeId} from Algolia.`);
   } catch (err) {
     console.error(`Error deleting route ${routeId} from Algolia:`, err.message);
@@ -156,7 +169,7 @@ async function syncAllRoutesToAlgolia() {
     }
 
     if (objects.length > 0) {
-      await client.saveObjects({ indexName: INDEX_NAME, objects });
+      await retry(() => client.saveObjects({ indexName: INDEX_NAME, objects }));
       console.log(`Successfully synced all ${objects.length} routes to Algolia.`);
     }
   } catch (err) {
@@ -172,7 +185,7 @@ async function syncUserToAlgolia(userId) {
   try {
     const obj = await getUserIndexObject(userId);
     if (obj) {
-      await client.saveObject({ indexName: INDEX_USERS, body: obj });
+      await retry(() => client.saveObject({ indexName: INDEX_USERS, body: obj }));
       console.log(`Synced user ${userId} to Algolia.`);
     }
   } catch (err) {
@@ -185,7 +198,7 @@ async function deleteUserFromAlgolia(userId) {
   if (!client) return;
 
   try {
-    await client.deleteObject({ indexName: INDEX_USERS, objectID: userId.toString() });
+    await retry(() => client.deleteObject({ indexName: INDEX_USERS, objectID: userId.toString() }));
     console.log(`Deleted user ${userId} from Algolia.`);
   } catch (err) {
     console.error(`Error deleting user ${userId} from Algolia:`, err.message);
@@ -207,7 +220,7 @@ async function syncAllUsersToAlgolia() {
     }
 
     if (objects.length > 0) {
-      await client.saveObjects({ indexName: INDEX_USERS, objects });
+      await retry(() => client.saveObjects({ indexName: INDEX_USERS, objects }));
       console.log(`Successfully synced all ${objects.length} users to Algolia.`);
     }
   } catch (err) {
@@ -223,7 +236,7 @@ async function syncAgencyToAlgolia(agencyId) {
   try {
     const obj = await getAgencyIndexObject(agencyId);
     if (obj) {
-      await client.saveObject({ indexName: INDEX_AGENCIES, body: obj });
+      await retry(() => client.saveObject({ indexName: INDEX_AGENCIES, body: obj }));
       console.log(`Synced agency ${agencyId} to Algolia.`);
     }
   } catch (err) {
@@ -236,7 +249,7 @@ async function deleteAgencyFromAlgolia(agencyId) {
   if (!client) return;
 
   try {
-    await client.deleteObject({ indexName: INDEX_AGENCIES, objectID: agencyId.toString() });
+    await retry(() => client.deleteObject({ indexName: INDEX_AGENCIES, objectID: agencyId.toString() }));
     console.log(`Deleted agency ${agencyId} from Algolia.`);
   } catch (err) {
     console.error(`Error deleting agency ${agencyId} from Algolia:`, err.message);
@@ -258,7 +271,7 @@ async function syncAllAgenciesToAlgolia() {
     }
 
     if (objects.length > 0) {
-      await client.saveObjects({ indexName: INDEX_AGENCIES, objects });
+      await retry(() => client.saveObjects({ indexName: INDEX_AGENCIES, objects }));
       console.log(`Successfully synced all ${objects.length} agencies to Algolia.`);
     }
   } catch (err) {
@@ -274,7 +287,7 @@ async function syncBookingToAlgolia(bookingId) {
   try {
     const obj = await getBookingIndexObject(bookingId);
     if (obj) {
-      await client.saveObject({ indexName: INDEX_BOOKINGS, body: obj });
+      await retry(() => client.saveObject({ indexName: INDEX_BOOKINGS, body: obj }));
       console.log(`Synced booking ${bookingId} to Algolia.`);
     }
   } catch (err) {
@@ -287,7 +300,7 @@ async function deleteBookingFromAlgolia(bookingId) {
   if (!client) return;
 
   try {
-    await client.deleteObject({ indexName: INDEX_BOOKINGS, objectID: bookingId.toString() });
+    await retry(() => client.deleteObject({ indexName: INDEX_BOOKINGS, objectID: bookingId.toString() }));
     console.log(`Deleted booking ${bookingId} from Algolia.`);
   } catch (err) {
     console.error(`Error deleting booking ${bookingId} from Algolia:`, err.message);
@@ -309,7 +322,7 @@ async function syncAllBookingsToAlgolia() {
     }
 
     if (objects.length > 0) {
-      await client.saveObjects({ indexName: INDEX_BOOKINGS, objects });
+      await retry(() => client.saveObjects({ indexName: INDEX_BOOKINGS, objects }));
       console.log(`Successfully synced all ${objects.length} bookings to Algolia.`);
     }
   } catch (err) {

@@ -77,10 +77,12 @@ async function removeDriver(userId, driverId) {
     err.status = 409;
     throw err;
   }
-  await Booking.update(
-    { status: 'Cancelled', cancelReason: 'Driver removed from agency' },
-    { where: { driverId: driver.id, status: 'Pending' } }
-  );
+  const pendingBookings = await Booking.findAll({ where: { driverId: driver.id, status: 'Pending' } });
+  for (const b of pendingBookings) {
+    b.status = 'Cancelled';
+    b.cancelReason = 'Driver removed from agency';
+    await b.save();
+  }
   driver.agencyId = null;
   await driver.save();
   return { message: 'Driver removed from agency' };

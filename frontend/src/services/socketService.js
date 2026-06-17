@@ -10,10 +10,10 @@ function getSocketUrl() {
       const url = new URL(apiUrl);
       return `${url.protocol}//${url.host}`;
     } catch {
-      return 'http://localhost:5000';
+      return 'http://localhost:8080';
     }
   }
-  return 'http://localhost:5000';
+  return 'http://localhost:8080';
 }
 
 const SOCKET_URL = getSocketUrl();

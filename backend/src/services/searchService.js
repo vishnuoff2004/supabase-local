@@ -4,9 +4,10 @@ const { getAlgoliaClient, INDEX_NAME } = require('../config/algolia');
 
 // Original database-based search implementation (fallback)
 async function searchRoutesDatabase(source, destination, userId = null, filters = {}) {
+  const statusFilter = filters.status || 'active';
   const where = {
     available: true,
-    status: 'active',
+    status: statusFilter,
     departureTime: { [Op.gte]: new Date() },
   };
   if (source) {
@@ -132,10 +133,11 @@ async function searchRoutes(source, destination, userId = null, filters = {}) {
     // 1. Build Algolia search query
     const query = [source, destination].filter(Boolean).join(' ');
 
-    // 2. Build Algolia filters (available, active, future time)
+    // 2. Build Algolia filters (available, status, future time)
+    const statusFilter = filters.status || 'active';
     const algoliaFilters = [
       'available = 1',
-      'status:active',
+      `status:${statusFilter}`,
       `departureTimeTimestamp >= ${Math.floor(Date.now() / 1000)}`,
     ];
 

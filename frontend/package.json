@@ -25,7 +25,7 @@
     "generate-icons": "node scripts/generate-icons.js",
     "prebuild": "npm run generate-icons || echo 'Icon generation skipped (non-fatal)'"
   },
-  "proxy": "http://localhost:5000",
+  "proxy": "http://localhost:8080",
   "browserslist": {
     "production": [
       ">0.2%",

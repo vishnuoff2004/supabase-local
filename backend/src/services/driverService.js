@@ -280,6 +280,20 @@ async function updateTripStatus(driverUserId, bookingId, newStatus) {
     throw err;
   }
 
+  // Sync to Algolia AFTER transaction commits
+  // hooks fire inside the transaction and read stale data
+  const { syncBookingToAlgolia, syncRouteToAlgolia } = require('../utils/algoliaSync');
+  syncBookingToAlgolia(booking.id).catch(err =>
+    console.error('Error syncing booking to Algolia after status change:', err.message)
+  );
+  if (newStatus === 'Completed') {
+    Route.findByPk(booking.routeId).then(route => {
+      if (route) syncRouteToAlgolia(route.id);
+    }).catch(err =>
+      console.error('Error syncing completed route to Algolia:', err.message)
+    );
+  }
+
   return booking;
 }
 
