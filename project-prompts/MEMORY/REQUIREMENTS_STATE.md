@@ -77,7 +77,7 @@ All requirements are finalized and have associated tests. COMMAND 7 validation p
 | ASSUMPTION-001 | Phone number format (10-15 digits, optional +) | Active |
 | ASSUMPTION-002 | Vehicle capacity 1-60, predefined types | Active |
 | ASSUMPTION-003 | Single currency INR | Active |
-| ASSUMPTION-004 | In-app only notifications, no email | Active |
+| ASSUMPTION-004 | Email notifications supported via Nodemailer | Active |
 | ASSUMPTION-005 | Local filesystem storage | Active |
 | ASSUMPTION-006 | Single time zone IST | Active |
 | ASSUMPTION-007 | No payment processing in MVP | Active |

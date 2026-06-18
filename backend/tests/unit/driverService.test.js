@@ -343,3 +343,74 @@ describe('driverService.setOverallAvailability', () => {
     ).rejects.toThrow('Driver profile not found');
   });
 });
+
+describe('driverService — driver availability during trip (TEST-123, TEST-124, TEST-147)', () => {
+  let mockAvailableDriver;
+  let mockOntripDriver;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockAvailableDriver = {
+      id: 10, userId: 1, available: true,
+      save: jest.fn().mockResolvedValue(true),
+    };
+    mockOntripDriver = {
+      id: 10, userId: 1, available: false,
+      save: jest.fn().mockResolvedValue(true),
+    };
+    // Route.findByPk is called inside updateTripStatus — must be mocked
+    Route.findByPk = jest.fn().mockResolvedValue({
+      id: 100, source: 'Mumbai', destination: 'Pune',
+    });
+    sequelize.transaction.mockResolvedValue({
+      commit: jest.fn().mockResolvedValue(true),
+      rollback: jest.fn().mockResolvedValue(true),
+    });
+    BookingStatusHistory.create.mockResolvedValue({});
+  });
+
+  test('driver should become unavailable when trip starts — TEST-123', async () => {
+    const mockBooking = {
+      id: 300, driverId: 10, userId: 5, routeId: 100, status: 'Confirmed',
+      save: jest.fn().mockResolvedValue(true),
+    };
+    Driver.findOne.mockResolvedValue(mockAvailableDriver);
+    Booking.findByPk.mockResolvedValue(mockBooking);
+    Booking.findOne.mockResolvedValue(null); // no active trip
+
+    const result = await driverService.updateTripStatus(1, 300, 'On Trip');
+
+    expect(result.status).toBe('On Trip');
+    expect(mockAvailableDriver.available).toBe(false);
+  });
+
+  test('driver should become available again when trip completes — TEST-124', async () => {
+    const mockBooking = {
+      id: 301, driverId: 10, userId: 5, routeId: 100, status: 'On Trip',
+      save: jest.fn().mockResolvedValue(true),
+    };
+    Driver.findOne.mockResolvedValue(mockOntripDriver);
+    Booking.findByPk.mockResolvedValue(mockBooking);
+    Booking.findOne.mockResolvedValue(null);
+
+    const result = await driverService.updateTripStatus(1, 301, 'Completed');
+
+    expect(result.status).toBe('Completed');
+    expect(mockOntripDriver.available).toBe(true);
+  });
+
+  test('driver already on trip should block new trip start — TEST-147', async () => {
+    const mockBooking = {
+      id: 302, driverId: 10, userId: 5, routeId: 100, status: 'Confirmed',
+      save: jest.fn(),
+    };
+    Driver.findOne.mockResolvedValue(mockAvailableDriver);
+    Booking.findByPk.mockResolvedValue(mockBooking);
+    // Another active trip exists
+    Booking.findOne.mockResolvedValue({ id: 303, status: 'On Trip' });
+
+    await expect(
+      driverService.updateTripStatus(1, 302, 'On Trip')
+    ).rejects.toThrow(/already have an active trip/i);
+  });
+});

@@ -5,15 +5,15 @@ function getSocketUrl() {
   if (explicitUrl) return explicitUrl;
 
   const apiUrl = process.env.REACT_APP_API_URL;
-  if (apiUrl) {
+  if (apiUrl && apiUrl.startsWith('http')) {
     try {
       const url = new URL(apiUrl);
       return `${url.protocol}//${url.host}`;
     } catch {
-      return 'http://localhost:8080';
+      // fallback
     }
   }
-  return 'http://localhost:8080';
+  return typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5000';
 }
 
 const SOCKET_URL = getSocketUrl();

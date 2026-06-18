@@ -6,6 +6,7 @@ jest.mock('../../src/services/bookingService');
 jest.mock('../../src/services/adminService');
 jest.mock('../../src/services/userService');
 jest.mock('../../src/services/searchService');
+jest.mock('../../src/services/driverService');
 
 const app = require('../../src/app');
 const authService = require('../../src/services/authService');
@@ -13,6 +14,7 @@ const bookingService = require('../../src/services/bookingService');
 const adminService = require('../../src/services/adminService');
 const userService = require('../../src/services/userService');
 const searchService = require('../../src/services/searchService');
+const driverService = require('../../src/services/driverService');
 
 const validUser = {
   id: 1,
@@ -155,6 +157,16 @@ describe('TEST-005 to TEST-016 — Auth Integration', () => {
         .get('/api/admin/users')
         .set('Authorization', `Bearer ${token}`);
       expect(res.status).toBe(403);
+    });
+
+    test('driver can access driver endpoint — TEST-015', async () => {
+      const token = makeToken('driver');
+      driverService.createRoute.mockResolvedValue({ id: 1 });
+      const res = await request(app)
+        .post('/api/drivers/routes')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ source: 'Mumbai', destination: 'Pune', departureTime: '2026-07-15T08:00:00Z', arrivalTime: '2026-07-15T12:00:00Z', fare: 500, capacity: 4 });
+      expect(res.status).toBe(201);
     });
 
     test('admin can access admin endpoint — TEST-016', async () => {

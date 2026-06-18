@@ -61,4 +61,32 @@ describe('Admin APIs (REQ-019 to REQ-021)', () => {
       .set('Authorization', `Bearer ${travelerToken}`);
     expect(res.status).toBe(403);
   });
+
+  test('non-admin cannot create agency — TEST-077', async () => {
+    const travelerToken = jwt.sign({ id: 1, role: 'traveler' }, process.env.JWT_SECRET || 'travel-agency-jwt-secret-dev');
+    const res = await request(app)
+      .post('/api/admin/agencies')
+      .set('Authorization', `Bearer ${travelerToken}`)
+      .send({ name: 'Hack Agency', email: 'hack@example.com', phone: '+911234567890' });
+    expect(res.status).toBe(403);
+  });
+
+  test('admin can cancel any booking — TEST-078', async () => {
+    adminService.adminCancelBooking.mockResolvedValue({ id: 1, status: 'Cancelled', cancelledBy: 99 });
+    const res = await request(app)
+      .put('/api/admin/bookings/1/cancel')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ reason: 'Policy violation' });
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe('Cancelled');
+  });
+
+  test('deactivated agency routes excluded after deactivation — TEST-076', async () => {
+    adminService.deactivateAgency.mockResolvedValue({ id: 1, active: false });
+    const res = await request(app)
+      .put('/api/admin/agencies/1/deactivate')
+      .set('Authorization', `Bearer ${adminToken}`);
+    expect(res.status).toBe(200);
+    expect(res.body.active).toBe(false);
+  });
 });

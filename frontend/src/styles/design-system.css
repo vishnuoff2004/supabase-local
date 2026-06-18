@@ -1870,7 +1870,8 @@ h6 { font-size: 1rem; }
   font-size: 0.75rem;
 }
 
-.search-filters-popup .price-slider.dual {
+.search-filters-popup .price-slider.dual,
+.search-filters-popup .price-slider.single {
   padding-top: 24px;
 }
 
@@ -1945,9 +1946,14 @@ h6 { font-size: 1rem; }
   padding: 2px 0;
 }
 
-.price-slider.dual {
+.price-slider.dual,
+.price-slider.single {
   position: relative;
   padding-top: 28px;
+}
+
+.price-slider__input--single {
+  pointer-events: auto !important;
 }
 
 .price-slider__track {

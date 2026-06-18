@@ -64,4 +64,48 @@ describe('Booking APIs (REQ-008 to REQ-011, REQ-039 to REQ-041)', () => {
       .send({ routeId: 1, driverId: 1, seatCount: 2, travelDate: '2026-07-15' });
     expect(res.status).toBe(401);
   });
+
+  test('GET /api/bookings should return paginated response — TEST-033', async () => {
+    bookingService.getUserBookings.mockResolvedValue({
+      data: [{ id: 1, status: 'Pending' }, { id: 2, status: 'Confirmed' }],
+      page: 1, limit: 10, totalPages: 1, totalItems: 2,
+    });
+    const res = await request(app)
+      .get('/api/bookings?page=1&limit=10')
+      .set('Authorization', `Bearer ${travelerToken}`);
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty('totalPages');
+    expect(res.body).toHaveProperty('totalItems');
+    expect(Array.isArray(res.body.data)).toBe(true);
+  });
+
+  test('GET /api/bookings returns empty array for new user — TEST-034 / TEST-113', async () => {
+    bookingService.getUserBookings.mockResolvedValue({
+      data: [], page: 1, limit: 10, totalPages: 0, totalItems: 0,
+    });
+    const res = await request(app)
+      .get('/api/bookings')
+      .set('Authorization', `Bearer ${travelerToken}`);
+    expect(res.status).toBe(200);
+    expect(res.body.data).toEqual([]);
+  });
+
+  test('GET /api/bookings empty state response contains totalItems field — TEST-114', async () => {
+    bookingService.getUserBookings.mockResolvedValue({
+      data: [], page: 1, limit: 10, totalPages: 0, totalItems: 0,
+    });
+    const res = await request(app)
+      .get('/api/bookings')
+      .set('Authorization', `Bearer ${travelerToken}`);
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty('totalItems', 0);
+  });
+
+  test('GET /api/bookings/999/status for non-existent booking — TEST-038', async () => {
+    bookingService.getBookingStatus.mockRejectedValue({ status: 404, message: 'Booking not found' });
+    const res = await request(app)
+      .get('/api/bookings/999/status')
+      .set('Authorization', `Bearer ${travelerToken}`);
+    expect(res.status).toBe(404);
+  });
 });

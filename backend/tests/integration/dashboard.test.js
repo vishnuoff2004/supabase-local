@@ -22,7 +22,7 @@ describe('Dashboard APIs (REQ-022 to REQ-024)', () => {
     jest.clearAllMocks();
   });
 
-  test('GET /api/dashboard/user should return 200 — TEST-081', async () => {
+  test('GET /api/dashboard/user should return 200 with activeBookings — TEST-081', async () => {
     Booking.count.mockResolvedValue(0);
     Booking.findAll.mockResolvedValue([]);
     const res = await request(app)
@@ -33,7 +33,7 @@ describe('Dashboard APIs (REQ-022 to REQ-024)', () => {
     expect(res.body).toHaveProperty('totalBookings');
   });
 
-  test('GET /api/dashboard/admin should return 200 — TEST-085', async () => {
+  test('GET /api/dashboard/admin shows counts — TEST-085', async () => {
     User.count.mockResolvedValue(10);
     Agency.count.mockResolvedValue(3);
     Booking.count.mockResolvedValue(5);
@@ -46,6 +46,41 @@ describe('Dashboard APIs (REQ-022 to REQ-024)', () => {
     expect(res.body).toHaveProperty('totalAgencies');
     expect(res.body).toHaveProperty('totalActiveBookings');
     expect(res.body).toHaveProperty('bookingsByStatus');
+  });
+
+  test('GET /api/dashboard/admin includes status breakdown — TEST-086', async () => {
+    User.count.mockResolvedValue(5);
+    Agency.count.mockResolvedValue(2);
+    Booking.count.mockResolvedValueOnce(10).mockResolvedValueOnce(3).mockResolvedValueOnce(4).mockResolvedValueOnce(1).mockResolvedValueOnce(2).mockResolvedValueOnce(0);
+    const res = await request(app)
+      .get('/api/dashboard/admin')
+      .set('Authorization', `Bearer ${adminToken}`);
+    expect(res.status).toBe(200);
+    expect(res.body.bookingsByStatus).toBeDefined();
+    expect(typeof res.body.bookingsByStatus).toBe('object');
+  });
+
+  test('GET /api/dashboard/driver shows pending requests — TEST-083', async () => {
+    Driver.findOne.mockResolvedValue({ id: 1, userId: 2, available: true });
+    Booking.count.mockResolvedValueOnce(3).mockResolvedValueOnce(1);
+    Booking.findAll.mockResolvedValue([{ id: 1, status: 'On Trip' }]);
+    const res = await request(app)
+      .get('/api/dashboard/driver')
+      .set('Authorization', `Bearer ${driverToken}`);
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty('pendingRequests');
+  });
+
+  test('GET /api/dashboard/driver shows upcoming active trips — TEST-082', async () => {
+    Driver.findOne.mockResolvedValue({ id: 1, userId: 2, available: true });
+    Booking.count.mockResolvedValueOnce(2).mockResolvedValueOnce(1);
+    Booking.findAll.mockResolvedValue([{ id: 5, status: 'Confirmed', travelDate: '2026-07-20' }]);
+    const res = await request(app)
+      .get('/api/dashboard/driver')
+      .set('Authorization', `Bearer ${driverToken}`);
+    expect(res.status).toBe(200);
+    // Driver dashboard returns 'activeTrips' (confirmed/on-trip bookings)
+    expect(res.body).toHaveProperty('activeTrips');
   });
 
   test('traveler cannot access admin dashboard', async () => {

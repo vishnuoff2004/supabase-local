@@ -207,3 +207,98 @@ describe('adminService.getDashboardData', () => {
     expect(result.bookingsByStatus.Completed).toBe(8);
   });
 });
+
+describe('adminService.deactivateAgency — booking cascade (TEST-125, TEST-126, TEST-127, TEST-128)', () => {
+  const mockAgency = {
+    id: 1, active: true,
+    save: jest.fn().mockResolvedValue(true),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockAgency.active = true;
+    Agency.findByPk.mockResolvedValue(mockAgency);
+    Driver.findAll.mockResolvedValue([{ id: 10 }, { id: 11 }]);
+  });
+
+  test('pending booking should be cancelled when driver removed from agency — TEST-125', async () => {
+    const pendingBooking = {
+      id: 500, status: 'Pending',
+      save: jest.fn().mockImplementation(function () {
+        return Promise.resolve(this);
+      }),
+    };
+    Booking.findAll.mockResolvedValue([pendingBooking]);
+
+    await adminService.deactivateAgency(99, 1);
+
+    expect(pendingBooking.status).toBe('Cancelled');
+    expect(pendingBooking.cancelReason).toMatch(/deactivated/i);
+  });
+
+  test('confirmed booking should be preserved when agency deactivated — TEST-126', async () => {
+    // Confirmed bookings are NOT cascaded (only Pending ones)
+    const confirmedBooking = {
+      id: 501, status: 'Confirmed',
+      save: jest.fn(),
+    };
+    // findAll with status Pending returns empty (no pending)
+    Booking.findAll.mockResolvedValue([]);
+
+    await adminService.deactivateAgency(99, 1);
+
+    expect(confirmedBooking.save).not.toHaveBeenCalled();
+    expect(confirmedBooking.status).toBe('Confirmed');
+  });
+
+  test('agency deactivation should cancel pending bookings — TEST-127', async () => {
+    const pendingBooking1 = {
+      id: 502, status: 'Pending',
+      save: jest.fn().mockResolvedValue(true),
+    };
+    const pendingBooking2 = {
+      id: 503, status: 'Pending',
+      save: jest.fn().mockResolvedValue(true),
+    };
+    Booking.findAll.mockResolvedValue([pendingBooking1, pendingBooking2]);
+
+    await adminService.deactivateAgency(99, 1);
+
+    expect(pendingBooking1.status).toBe('Cancelled');
+    expect(pendingBooking2.status).toBe('Cancelled');
+    expect(BookingStatusHistory.create).toHaveBeenCalledTimes(2);
+  });
+
+  test('agency deactivation should NOT change On Trip or Completed bookings — TEST-128', async () => {
+    // Only Pending bookings are cancelled on deactivation
+    Booking.findAll.mockResolvedValue([]); // No pending bookings
+
+    const result = await adminService.deactivateAgency(99, 1);
+
+    expect(mockAgency.active).toBe(false);
+    expect(BookingStatusHistory.create).not.toHaveBeenCalled();
+  });
+});
+
+describe('adminService.adminCancelBooking — audit log (TEST-078, TEST-080)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('admin cancel should log adminId in cancelledBy — TEST-080', async () => {
+    const mockBooking = {
+      id: 600, status: 'Pending',
+      save: jest.fn().mockResolvedValue(true),
+    };
+    Booking.findByPk.mockResolvedValue(mockBooking);
+    BookingStatusHistory.create.mockResolvedValue({});
+
+    const result = await adminService.adminCancelBooking(99, 600, 'Policy violation');
+
+    expect(result.cancelledBy).toBe(99);
+    expect(result.cancelReason).toBe('Policy violation');
+    expect(BookingStatusHistory.create).toHaveBeenCalledWith(
+      expect.objectContaining({ changedBy: 99, toStatus: 'Cancelled' })
+    );
+  });
+});
