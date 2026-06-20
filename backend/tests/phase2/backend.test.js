@@ -84,7 +84,7 @@ describe('Phase 2 Backend — Booking Event Handlers', () => {
     }));
   });
 
-  test('emitBookingStatusChanged sends status transition', () => {
+  test('emitBookingStatusChanged sends status transition — TEST-150', () => {
     const handlers = registerBookingHandlers(mockIo);
     handlers.emitBookingStatusChanged({ id: 1, status: 'Confirmed' }, 42, 'Pending');
 
@@ -92,6 +92,17 @@ describe('Phase 2 Backend — Booking Event Handlers', () => {
       bookingId: 1,
       previousStatus: 'Pending',
       newStatus: 'Confirmed',
+    }));
+  });
+
+  test('emitBookingCreated sends event only to the correct user room — TEST-152', () => {
+    const handlers = registerBookingHandlers(mockIo);
+    handlers.emitBookingCreated({ id: 1, status: 'Pending', routeId: 1, travelDate: '2026-07-15' }, 42);
+
+    expect(mockNamespace.to).toHaveBeenCalledWith('user:42');
+    expect(mockNamespace.to).not.toHaveBeenCalledWith('user:99');
+    expect(mockNamespace.emit).toHaveBeenCalledWith('booking:created', expect.objectContaining({
+      bookingId: 1,
     }));
   });
 
@@ -120,7 +131,7 @@ describe('Phase 2 Backend — Driver Event Handlers', () => {
     };
   });
 
-  test('emitAvailabilityChanged sends event to driver and agency rooms', () => {
+  test('emitAvailabilityChanged sends event to driver and agency rooms — TEST-151', () => {
     const handlers = registerDriverHandlers(mockIo);
     handlers.emitAvailabilityChanged(1, 42, true);
 
@@ -164,10 +175,38 @@ describe('Phase 2 Backend — Dashboard Event Handlers', () => {
     }));
   });
 });
+
+describe('Phase 2 Backend — Socket Reconnection (TEST-155)', () => {
+  test('handler re-registration works after simulated reconnect — TEST-155', () => {
+    const namespaceA = {
+      to: jest.fn().mockReturnThis(),
+      emit: jest.fn(),
+    };
+    const ioA = { of: jest.fn().mockReturnValue(namespaceA) };
+    const handlersA = registerBookingHandlers(ioA);
+    handlersA.emitBookingStatusChanged({ id: 1, status: 'Confirmed' }, 42, 'Pending');
+
+    expect(namespaceA.emit).toHaveBeenCalledWith('booking:status-changed', expect.objectContaining({
+      bookingId: 1,
+    }));
+
+    const namespaceB = {
+      to: jest.fn().mockReturnThis(),
+      emit: jest.fn(),
+    };
+    const ioB = { of: jest.fn().mockReturnValue(namespaceB) };
+    const handlersB = registerBookingHandlers(ioB);
+    handlersB.emitBookingStatusChanged({ id: 2, status: 'On Trip' }, 43, 'Confirmed');
+
+    expect(namespaceB.emit).toHaveBeenCalledWith('booking:status-changed', expect.objectContaining({
+      bookingId: 2,
+    }));
+  });
+});
 });
 
 describe('Phase 2 Backend — Notification Service', () => {
-  test('sendNotification creates notification in DB', async () => {
+  test('sendNotification creates notification in DB — TEST-156', async () => {
     const { sendNotification, getUserNotifications } = require('../../src/services/notificationService');
     const notification = await sendNotification({
       userId: 1,
@@ -180,7 +219,7 @@ describe('Phase 2 Backend — Notification Service', () => {
     expect(notification.isRead).toBe(false);
   });
 
-  test('getUserNotifications returns paginated results', async () => {
+  test('getUserNotifications returns paginated results — TEST-159', async () => {
     const { getUserNotifications } = require('../../src/services/notificationService');
     const result = await getUserNotifications(1);
     expect(result).toHaveProperty('data');
@@ -195,7 +234,7 @@ describe('Phase 2 Backend — Notification Service', () => {
     expect(typeof count).toBe('number');
   });
 
-  test('markAsRead updates notification', async () => {
+  test('markAsRead updates notification — TEST-157', async () => {
     const { sendNotification, markAsRead, getUnreadCount } = require('../../src/services/notificationService');
     const notif = await sendNotification({ userId: 1, type: 'info', title: 'Read test', body: 'test' });
     const unreadBefore = await getUnreadCount(1);
@@ -210,7 +249,7 @@ describe('Phase 2 Backend — Notification Service', () => {
     expect(result).toBeNull();
   });
 
-  test('markAllAsRead sets all as read', async () => {
+  test('markAllAsRead sets all as read — TEST-158', async () => {
     const { markAllAsRead, getUnreadCount } = require('../../src/services/notificationService');
     await markAllAsRead(1);
     const count = await getUnreadCount(1);

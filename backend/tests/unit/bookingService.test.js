@@ -35,6 +35,7 @@ jest.mock('../../src/models', () => {
     },
     BookingStatusHistory: {
       create: jest.fn(),
+      findAll: jest.fn(),
     },
     Route: {
       findByPk: jest.fn().mockResolvedValue(mockRoute),
@@ -83,6 +84,19 @@ describe('bookingService.createBooking unit tests', () => {
         travelDate: '2026-07-13', // mismatched date
       })
     ).rejects.toThrow('Booking date must match the route departure date');
+  });
+
+  test('should throw error if route is unavailable — TEST-053', async () => {
+    mockRoute.available = false;
+
+    await expect(
+      bookingService.createBooking(1, {
+        routeId: 10,
+        driverId: 20,
+        seatCount: 2,
+        travelDate: '2026-07-11',
+      })
+    ).rejects.toThrow('This route is currently unavailable');
   });
 
   test('should merge bookings on same route/driver/date and update seat count', async () => {
@@ -270,6 +284,56 @@ describe('bookingService — capacity & duplicate checks (TEST-115, TEST-119, TE
   });
 });
 
+describe('bookingService — last seat concurrent booking (TEST-118)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('TEST-118: second booking on last seat should be rejected — exclusive vehicle rule', async () => {
+    // Route with capacity=1 (single seat)
+    Route.findByPk.mockResolvedValue({
+      id: 10, driverId: 20, capacity: 1, available: true, status: 'active',
+      departureTime: '2026-07-11T12:00:00Z',
+    });
+    Driver.findByPk.mockResolvedValue({ id: 20 });
+
+    // Traveler A (userId=1) already has the only seat committed for this driver+date.
+    // The exclusive-vehicle check (first findOne) returns their booking → Traveler B is rejected.
+    const travelerABooking = { id: 99, userId: 1, seatCount: 1, status: 'Confirmed' };
+    Booking.findOne
+      .mockResolvedValueOnce(travelerABooking)  // exclusive-vehicle block fires
+      .mockResolvedValueOnce(null);             // merge check — never reached
+
+    // Traveler B (userId=2) tries to book the last seat — should fail with 409
+    await expect(
+      bookingService.createBooking(2, {
+        routeId: 10, driverId: 20, seatCount: 1, travelDate: '2026-07-11',
+      })
+    ).rejects.toThrow(/exclusively booked/i);
+  });
+
+  test('TEST-118: first booking on last seat should succeed', async () => {
+    Route.findByPk.mockResolvedValue({
+      id: 10, driverId: 20, capacity: 1, available: true, status: 'active',
+      departureTime: '2026-07-11T12:00:00Z',
+    });
+    Driver.findByPk.mockResolvedValue({ id: 20 });
+
+    // No existing bookings — seat is free for Traveler A
+    Booking.findOne.mockResolvedValue(null);
+    Booking.create.mockResolvedValue({ id: 100, status: 'Pending', seatCount: 1 });
+    BookingStatusHistory.create.mockResolvedValue({});
+
+    const result = await bookingService.createBooking(1, {
+      routeId: 10, driverId: 20, seatCount: 1, travelDate: '2026-07-11',
+    });
+
+    expect(result.id).toBe(100);
+    expect(result.status).toBe('Pending');
+  });
+});
+
+
 describe('bookingService — cancel logic (TEST-040, TEST-041, TEST-042)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -310,5 +374,90 @@ describe('bookingService — cancel logic (TEST-040, TEST-041, TEST-042)', () =>
     await expect(
       bookingService.cancelBooking(1, 202)
     ).rejects.toThrow(/already cancelled/i);
+  });
+});
+
+describe('bookingService — status transitions (TEST-035, TEST-036)', () => {
+  test('TEST-035: returns true for valid transitions', () => {
+    const valid = [
+      ['Pending', 'Confirmed'],
+      ['Pending', 'Cancelled'],
+      ['Confirmed', 'On Trip'],
+      ['Confirmed', 'Cancelled'],
+      ['On Trip', 'Completed'],
+    ];
+    for (const [from, to] of valid) {
+      expect(bookingService.isValidTransition(from, to)).toBe(true);
+    }
+  });
+
+  test('TEST-036: returns false for invalid transitions', () => {
+    const invalid = [
+      ['Pending', 'Completed'],
+      ['Pending', 'On Trip'],
+      ['Confirmed', 'Completed'],
+      ['Completed', 'Pending'],
+      ['Completed', 'Cancelled'],
+      ['Cancelled', 'Pending'],
+      ['Cancelled', 'Confirmed'],
+      ['Cancelled', 'On Trip'],
+      ['Cancelled', 'Completed'],
+    ];
+    for (const [from, to] of invalid) {
+      expect(bookingService.isValidTransition(from, to)).toBe(false);
+    }
+  });
+
+  test('TEST-035: edge case — same status transition is invalid', () => {
+    const allStatuses = ['Pending', 'Confirmed', 'On Trip', 'Completed', 'Cancelled'];
+    for (const s of allStatuses) {
+      expect(bookingService.isValidTransition(s, s)).toBe(false);
+    }
+  });
+});
+
+describe('bookingService — getStatusHistory (TEST-037)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('TEST-037: returns status history with timestamps', async () => {
+    const mockHistory = [
+      { fromStatus: null, toStatus: 'Pending', createdAt: new Date('2026-07-11T10:00:00Z') },
+      { fromStatus: 'Pending', toStatus: 'Confirmed', createdAt: new Date('2026-07-11T10:30:00Z') },
+      { fromStatus: 'Confirmed', toStatus: 'On Trip', createdAt: new Date('2026-07-11T11:00:00Z') },
+    ];
+    BookingStatusHistory.findAll.mockResolvedValue(mockHistory);
+
+    const result = await bookingService.getStatusHistory(1);
+
+    expect(result).toHaveLength(3);
+    expect(result[0]).toEqual({
+      fromStatus: null,
+      toStatus: 'Pending',
+      changedAt: mockHistory[0].createdAt,
+    });
+    expect(result[1]).toEqual({
+      fromStatus: 'Pending',
+      toStatus: 'Confirmed',
+      changedAt: mockHistory[1].createdAt,
+    });
+    expect(result[2]).toEqual({
+      fromStatus: 'Confirmed',
+      toStatus: 'On Trip',
+      changedAt: mockHistory[2].createdAt,
+    });
+    expect(BookingStatusHistory.findAll).toHaveBeenCalledWith({
+      where: { bookingId: 1 },
+      order: [['createdAt', 'ASC']],
+    });
+  });
+
+  test('TEST-037: returns empty array when no history exists', async () => {
+    BookingStatusHistory.findAll.mockResolvedValue([]);
+
+    const result = await bookingService.getStatusHistory(999);
+
+    expect(result).toEqual([]);
   });
 });

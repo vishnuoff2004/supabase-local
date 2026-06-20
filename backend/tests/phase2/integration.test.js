@@ -7,7 +7,7 @@ jest.mock('../../src/models', () => {
 
   const MockNotification = {
     create: jest.fn((data) => {
-      const notif = { id: nextId++, ...data, isRead: false, createdAt: new Date() };
+      const notif = { id: nextId++, ...data, isRead: false, createdAt: new Date(), save: jest.fn().mockResolvedValue(true) };
       notificationStore.push(notif);
       return Promise.resolve(notif);
     }),
@@ -21,12 +21,18 @@ jest.mock('../../src/models', () => {
       return Promise.resolve({ rows, count: filtered.length });
     }),
     findOne: jest.fn(({ where }) => {
-      const found = notificationStore.find(n => n.id === where.id && n.userId === where.userId);
+      const notifId = Number(where.id);
+      const found = notificationStore.find(n => n.id === notifId && n.userId === where.userId);
       return Promise.resolve(found || null);
     }),
     update: jest.fn((values, { where }) => {
+      const notifId = where.id ? Number(where.id) : null;
       notificationStore.forEach(n => {
-        if (n.userId === where.userId && n.isRead === where.isRead) {
+        if (notifId !== null) {
+          if (n.id === notifId && n.userId === where.userId) {
+            n.isRead = values.isRead;
+          }
+        } else if (n.userId === where.userId && n.isRead === where.isRead) {
           n.isRead = values.isRead;
         }
       });
@@ -50,7 +56,7 @@ const app = require('../../src/app');
 describe('Phase 2 Integration — Notification API', () => {
   const token = jwt.sign({ id: 1, role: 'traveler' }, process.env.JWT_SECRET || 'travel-agency-jwt-secret-dev');
 
-  test('GET /api/notifications returns list', async () => {
+  test('GET /api/notifications returns list — TEST-159', async () => {
     const res = await request(app).get('/api/notifications').set('Authorization', `Bearer ${token}`);
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty('data');
@@ -66,7 +72,7 @@ describe('Phase 2 Integration — Notification API', () => {
     expect(typeof res.body.count).toBe('number');
   });
 
-  test('PUT /api/notifications/read-all marks all as read', async () => {
+  test('PUT /api/notifications/read-all marks all as read — TEST-158', async () => {
     const res = await request(app).put('/api/notifications/read-all').set('Authorization', `Bearer ${token}`);
     expect(res.status).toBe(200);
     expect(res.body.message).toMatch(/read/i);
@@ -75,5 +81,26 @@ describe('Phase 2 Integration — Notification API', () => {
   test('GET /api/notifications without auth returns 401', async () => {
     const res = await request(app).get('/api/notifications');
     expect(res.status).toBe(401);
+  });
+
+  test('notification created via service appears in list — TEST-156', async () => {
+    const { sendNotification } = require('../../src/services/notificationService');
+    await sendNotification({ userId: 1, type: 'booking', title: 'Booking Confirmed', body: 'Your booking is confirmed' });
+
+    const res = await request(app).get('/api/notifications').set('Authorization', `Bearer ${token}`);
+    expect(res.status).toBe(200);
+    expect(res.body.totalItems).toBeGreaterThanOrEqual(1);
+    const created = res.body.data.find(n => n.title === 'Booking Confirmed');
+    expect(created).toBeDefined();
+    expect(created.isRead).toBe(false);
+  });
+
+  test('PUT /api/notifications/:id/read marks single notification as read — TEST-157', async () => {
+    const { sendNotification } = require('../../src/services/notificationService');
+    const notif = await sendNotification({ userId: 1, type: 'info', title: 'Mark Read Test', body: 'test' });
+
+    const res = await request(app).put(`/api/notifications/${notif.id}/read`).set('Authorization', `Bearer ${token}`);
+    expect(res.status).toBe(200);
+    expect(res.body.isRead).toBe(true);
   });
 });

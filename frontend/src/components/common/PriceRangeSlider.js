@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { formatPrice } from '../../utils/formatPrice';
 
 function PriceRangeSlider({ min = 0, max = 10000, step = 100, value, onChange }) {
   const [minVal, maxVal] = value;
@@ -30,8 +31,8 @@ function PriceRangeSlider({ min = 0, max = 10000, step = 100, value, onChange })
         aria-label="Maximum price"
       />
       <div className="price-slider__values">
-        <span className="price-slider__value price-slider__value--min">₹{min}</span>
-        <span className="price-slider__value price-slider__value--max">₹{maxVal}</span>
+        <span className="price-slider__value price-slider__value--min">{formatPrice(min)}</span>
+        <span className="price-slider__value price-slider__value--max">{formatPrice(maxVal)}</span>
       </div>
     </div>
   );

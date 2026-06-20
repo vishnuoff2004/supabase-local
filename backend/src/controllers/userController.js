@@ -3,7 +3,9 @@ const userService = require('../services/userService');
 async function getProfile(req, res, next) {
   try {
     const user = await userService.getProfile(req.user.id);
-    res.json(user);
+    // TEST-106 (REQ-032): never expose password or passwordHash in API response
+    const { password, passwordHash, ...safeUser } = (typeof user.toJSON === 'function' ? user.toJSON() : user);
+    res.json(safeUser);
   } catch (err) {
     next(err);
   }

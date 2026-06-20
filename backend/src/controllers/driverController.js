@@ -23,6 +23,15 @@ async function updateProfile(req, res, next) {
   }
 }
 
+async function getRoutes(req, res, next) {
+  try {
+    const routes = await driverService.getDriverRoutes(req.user.id);
+    res.json(routes);
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function createRoute(req, res, next) {
   try {
     const route = await driverService.createRoute(req.user.id, req.body);
@@ -126,6 +135,7 @@ module.exports = {
   createProfile,
   updateProfile,
   createRoute,
+  getRoutes,
   setRouteAvailability,
   acceptBooking,
   rejectBooking,

@@ -99,8 +99,14 @@ async function createRoute(userId, data) {
   return route;
 }
 
-async function setRouteAvailability(driverId, routeId, available) {
-  const route = await Route.findOne({ where: { id: routeId, driverId } });
+async function setRouteAvailability(driverUserId, routeId, available) {
+  const driver = await Driver.findOne({ where: { userId: driverUserId } });
+  if (!driver) {
+    const err = new Error('Driver profile not found');
+    err.status = 404;
+    throw err;
+  }
+  const route = await Route.findOne({ where: { id: routeId, driverId: driver.id } });
   if (!route) {
     const err = new Error('Route not found');
     err.status = 404;
@@ -309,6 +315,16 @@ async function setOverallAvailability(userId, available) {
   return driver;
 }
 
+async function getDriverRoutes(userId) {
+  const driver = await Driver.findOne({ where: { userId } });
+  if (!driver) return [];
+  const routes = await Route.findAll({
+    where: { driverId: driver.id },
+    order: [['createdAt', 'DESC']],
+  });
+  return routes;
+}
+
 async function getDashboardData(userId) {
   const driver = await Driver.findOne({ where: { userId } });
   if (!driver) {
@@ -332,6 +348,7 @@ module.exports = {
   createProfile,
   updateProfile,
   createRoute,
+  getDriverRoutes,
   setRouteAvailability,
   acceptBooking,
   rejectBooking,

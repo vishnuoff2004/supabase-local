@@ -42,7 +42,7 @@ jest.mock('../../src/models', () => {
   return {
     Driver: { findOne: jest.fn(), create: jest.fn(), findByPk: jest.fn() },
     User: { findByPk: jest.fn() },
-    Route: { findOne: jest.fn(), create: jest.fn() },
+    Route: { findOne: jest.fn(), create: jest.fn(), findByPk: jest.fn() },
     Booking: { findOne: jest.fn(), findByPk: jest.fn(), count: jest.fn(), findAll: jest.fn() },
     BookingStatusHistory: { create: jest.fn() },
     Sequelize: mockSequelize,
@@ -81,7 +81,7 @@ describe('driverService.createProfile', () => {
     ).rejects.toThrow('Driver profile already exists');
   });
 
-  test('should throw 409 if vehicle registration already exists', async () => {
+  test('should throw 409 if vehicle registration already exists — TEST-045', async () => {
     Driver.findOne
       .mockResolvedValueOnce(null) // no existing profile
       .mockResolvedValueOnce(mockDriver); // existing reg found
@@ -162,7 +162,7 @@ describe('driverService.createRoute', () => {
     );
   });
 
-  test('should throw 400 if source equals destination', async () => {
+  test('should throw 400 if source equals destination — TEST-048', async () => {
     await expect(
       driverService.createRoute(1, {
         source: 'Mumbai',
@@ -175,7 +175,7 @@ describe('driverService.createRoute', () => {
     ).rejects.toThrow('Source and destination cannot be the same');
   });
 
-  test('should throw 400 if departure time is in the past', async () => {
+  test('should throw 400 if departure time is in the past — TEST-049', async () => {
     await expect(
       driverService.createRoute(1, {
         source: 'Mumbai',
@@ -188,7 +188,7 @@ describe('driverService.createRoute', () => {
     ).rejects.toThrow('Departure time cannot be in the past');
   });
 
-  test('should throw 400 if arrival is before departure', async () => {
+  test('should throw 400 if arrival is before departure — TEST-050', async () => {
     await expect(
       driverService.createRoute(1, {
         source: 'Mumbai',
@@ -228,6 +228,55 @@ describe('driverService.createRoute', () => {
   });
 });
 
+describe('driverService.setRouteAvailability', () => {
+  const mockAvailRoute = {
+    id: 100,
+    driverId: 10,
+    source: 'Mumbai',
+    destination: 'Pune',
+    status: 'active',
+    available: true,
+    save: jest.fn().mockResolvedValue(true),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    Driver.findOne.mockResolvedValue(mockDriver);
+    Route.findOne.mockResolvedValue(mockAvailRoute);
+  });
+
+  test('should mark route as unavailable — TEST-051', async () => {
+    const result = await driverService.setRouteAvailability(1, 100, false);
+
+    expect(mockAvailRoute.available).toBe(false);
+    expect(mockAvailRoute.save).toHaveBeenCalled();
+  });
+
+  test('should mark route as available — TEST-052', async () => {
+    mockAvailRoute.available = false;
+    const result = await driverService.setRouteAvailability(1, 100, true);
+
+    expect(mockAvailRoute.available).toBe(true);
+    expect(mockAvailRoute.save).toHaveBeenCalled();
+  });
+
+  test('should throw 404 if route not found', async () => {
+    Route.findOne.mockResolvedValue(null);
+
+    await expect(
+      driverService.setRouteAvailability(1, 999, false)
+    ).rejects.toThrow('Route not found');
+  });
+
+  test('should throw 400 if making non-active route available', async () => {
+    mockAvailRoute.status = 'completed';
+
+    await expect(
+      driverService.setRouteAvailability(1, 100, true)
+    ).rejects.toThrow('Cannot make a completed or cancelled route available');
+  });
+});
+
 describe('driverService.acceptBooking', () => {
   const mockBooking = {
     id: 200,
@@ -255,7 +304,7 @@ describe('driverService.acceptBooking', () => {
     );
   });
 
-  test('should throw 403 if booking not assigned to driver', async () => {
+  test('should throw 403 if booking not assigned to driver — TEST-058', async () => {
     Booking.findByPk.mockResolvedValue({ ...mockBooking, driverId: 99 });
 
     await expect(
@@ -269,6 +318,41 @@ describe('driverService.acceptBooking', () => {
     await expect(
       driverService.acceptBooking(1, 200)
     ).rejects.toThrow('Cannot accept booking with status Cancelled');
+  });
+
+  test('should throw 400 if booking is already confirmed — TEST-056', async () => {
+    mockBooking.status = 'Confirmed';
+
+    await expect(
+      driverService.acceptBooking(1, 200)
+    ).rejects.toThrow('Booking is already confirmed');
+  });
+});
+
+describe('driverService.rejectBooking', () => {
+  const mockBooking = {
+    id: 200,
+    driverId: 10,
+    userId: 5,
+    routeId: 100,
+    seatCount: 2,
+    status: 'Pending',
+    save: jest.fn().mockResolvedValue(true),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    Driver.findOne.mockResolvedValue(mockDriver);
+    Booking.findByPk.mockResolvedValue(mockBooking);
+  });
+
+  test('should reject a pending booking with reason — TEST-055', async () => {
+    const reason = 'Vehicle under maintenance';
+    const result = await driverService.rejectBooking(1, 200, reason);
+
+    expect(result.status).toBe('Cancelled');
+    expect(result.cancelReason).toBe(reason);
+    expect(mockBooking.save).toHaveBeenCalled();
   });
 });
 
@@ -288,6 +372,7 @@ describe('driverService.updateTripStatus', () => {
     Driver.findOne.mockResolvedValue(mockDriver);
     Booking.findByPk.mockResolvedValue(mockBooking);
     Booking.findOne.mockResolvedValue(null);
+    Route.findByPk.mockResolvedValue({ id: 100, status: 'active', save: jest.fn().mockResolvedValue(true) });
     mockBooking.status = 'Confirmed';
     sequelize.transaction.mockResolvedValue({
       commit: jest.fn().mockResolvedValue(true),
@@ -295,7 +380,7 @@ describe('driverService.updateTripStatus', () => {
     });
   });
 
-  test('should transition from Confirmed to On Trip', async () => {
+  test('should transition from Confirmed to On Trip — TEST-059', async () => {
     mockBooking.save.mockResolvedValue(true);
     mockDriver.save.mockResolvedValue(true);
     const t = await sequelize.transaction();
@@ -319,6 +404,33 @@ describe('driverService.updateTripStatus', () => {
     await expect(
       driverService.updateTripStatus(1, 200, 'Cancelled')
     ).rejects.toThrow('Cannot transition to Cancelled from Confirmed');
+  });
+
+  test('should transition from On Trip to Completed — TEST-060', async () => {
+    mockBooking.status = 'On Trip';
+    mockBooking.save.mockResolvedValue(true);
+    mockDriver.save.mockResolvedValue(true);
+    const t = await sequelize.transaction();
+
+    const result = await driverService.updateTripStatus(1, 200, 'Completed');
+
+    expect(result.status).toBe('Completed');
+    expect(mockDriver.available).toBe(true);
+    expect(t.commit).toHaveBeenCalled();
+  });
+
+  test('should throw 400 for transition from Pending to On Trip — TEST-061', async () => {
+    mockBooking.status = 'Pending';
+
+    await expect(
+      driverService.updateTripStatus(1, 200, 'On Trip')
+    ).rejects.toThrow('Cannot transition to On Trip from Pending');
+  });
+
+  test('should throw 400 for transition from Confirmed to Completed — TEST-062', async () => {
+    await expect(
+      driverService.updateTripStatus(1, 200, 'Completed')
+    ).rejects.toThrow('Cannot transition to Completed from Confirmed');
   });
 });
 

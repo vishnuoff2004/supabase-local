@@ -175,6 +175,14 @@ async function searchRoutes(source, destination, userId = null, filters = {}) {
       },
     });
 
+    console.log('Algolia raw response keys:', Object.keys(searchResult));
+    console.log('Algolia hits length:', searchResult.hits?.length);
+    if (searchResult.hits?.length > 0) {
+      console.log('Algolia first hit sample:', JSON.stringify(searchResult.hits[0]));
+    } else {
+      console.log('Algolia full response:', JSON.stringify(searchResult).slice(0, 1000));
+    }
+
     const routeIds = searchResult.hits.map((hit) => hit.id);
     if (routeIds.length === 0) {
       return { data: [], message: 'No routes found for this destination', facetCounts: searchResult.facets || null };

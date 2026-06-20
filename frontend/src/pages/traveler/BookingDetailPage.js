@@ -6,6 +6,7 @@ import Button from '../../components/common/Button';
 import BookingStatusBadge from '../../components/BookingStatusBadge';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { ScrollReveal } from '../../hooks/useScrollAnimation';
+import { formatPrice } from '../../utils/formatPrice';
 
 function BookingDetailPage() {
   const { t } = useTranslation();
@@ -114,12 +115,12 @@ function BookingDetailPage() {
                       </div>
                       <div className="detail-field">
                         <span className="detail-label">{t('booking.farePerSeat', 'Fare per Seat')}</span>
-                        <span className="detail-value font-mono">₹{booking.Route.fare}</span>
+                        <span className="detail-value font-mono">{formatPrice(booking.Route.fare)}</span>
                       </div>
                       <div className="detail-field">
                         <span className="detail-label">{t('booking.totalAmount', 'Total Amount')}</span>
                         <span className="detail-value text-accent font-bold" style={{ fontSize: '1.15rem' }}>
-                          ₹{(Number(booking.Route.fare) * booking.seatCount).toFixed(2)}
+                          {formatPrice(Number(booking.Route.fare) * booking.seatCount)}
                         </span>
                       </div>
                     </div>

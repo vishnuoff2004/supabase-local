@@ -1,14 +1,59 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import Button from '../../components/common/Button';
+import Pagination from '../../components/common/Pagination';
 import { ScrollReveal } from '../../hooks/useScrollAnimation';
+
+const PAGE_SIZE = 10;
 
 function RouteManagementPage() {
   const { t } = useTranslation();
   const [form, setForm] = useState({ source: '', destination: '', departureTime: '', arrivalTime: '', fare: '', capacity: '' });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [routes, setRoutes] = useState([]);
+  const [routesLoading, setRoutesLoading] = useState(true);
+  const [routesError, setRoutesError] = useState(null);
+  const [toggleLoading, setToggleLoading] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [page, setPage] = useState(1);
+
+  const fetchRoutes = useCallback(async () => {
+    setRoutesLoading(true);
+    setRoutesError(null);
+    try {
+      const res = await api.get('/drivers/routes');
+      setRoutes(res.data);
+    } catch (err) {
+      setRoutesError(err.response?.data?.message || t('driver.failedToLoadRoutes', 'Failed to load routes'));
+    } finally {
+      setRoutesLoading(false);
+    }
+  }, [t]);
+
+  useEffect(() => {
+    fetchRoutes();
+  }, [fetchRoutes]);
+
+  const filteredRoutes = useMemo(() => {
+    let result = routes.filter(r => r.status === 'active');
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      result = result.filter(r =>
+        r.source.toLowerCase().includes(term) ||
+        r.destination.toLowerCase().includes(term)
+      );
+    }
+    return result;
+  }, [routes, searchTerm]);
+
+  const paginatedRoutes = useMemo(() => {
+    const start = (page - 1) * PAGE_SIZE;
+    return filteredRoutes.slice(start, start + PAGE_SIZE);
+  }, [filteredRoutes, page]);
+
+  const totalPages = Math.ceil(filteredRoutes.length / PAGE_SIZE);
 
   const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
@@ -20,11 +65,29 @@ function RouteManagementPage() {
       setSuccess(true);
       setForm({ source: '', destination: '', departureTime: '', arrivalTime: '', fare: '', capacity: '' });
       setTimeout(() => setSuccess(false), 3000);
+      fetchRoutes();
     } catch (err) {
       alert(err.response?.data?.message || t('driver.failedToCreateRoute', 'Failed to create route'));
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleToggleAvailability = async (routeId, currentAvailable) => {
+    setToggleLoading(routeId);
+    try {
+      await api.put(`/drivers/routes/${routeId}/availability`, { available: !currentAvailable });
+      fetchRoutes();
+    } catch (err) {
+      alert(err.response?.data?.message || t('driver.failedToUpdateAvailability', 'Failed to update availability'));
+    } finally {
+      setToggleLoading(null);
+    }
+  };
+
+  const formatDate = (dateStr) => {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   };
 
   return (
@@ -43,7 +106,7 @@ function RouteManagementPage() {
           <div className="route-form-card">
             {success && (
               <div className="success-state" style={{ padding: '16px 0' }}>
-                <div className="success-state-icon" style={{ width: 48, height: 48, fontSize: '1.2rem' }}>✓</div>
+                <div className="success-state-icon" style={{ width: 48, height: 48, fontSize: '1.2rem' }}>&#10003;</div>
                 <h3 style={{ marginTop: 8 }}>{t('driver.routeCreated', 'Route Created!')}</h3>
               </div>
             )}
@@ -84,6 +147,95 @@ function RouteManagementPage() {
               </Button>
             </form>
           </div>
+        </ScrollReveal>
+
+        <ScrollReveal className="animate-fade-up" style={{ marginTop: 32 }}>
+          <div className="admin-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+            <div>
+              <h2 className="admin-title" style={{ fontSize: '1.25rem' }}>{t('driver.myRoutes', 'My Routes')}</h2>
+            </div>
+            <input
+              className="form-input"
+              style={{ maxWidth: 280 }}
+              placeholder={t('driver.searchRoutes', 'Search routes...')}
+              value={searchTerm}
+              onChange={e => { setSearchTerm(e.target.value); setPage(1); }}
+            />
+          </div>
+
+          {routesLoading && (
+            <div className="table-loading">
+              <div className="skeleton" style={{ height: 40, marginBottom: 8 }} />
+              <div className="skeleton" style={{ height: 40, marginBottom: 8 }} />
+              <div className="skeleton" style={{ height: 40 }} />
+            </div>
+          )}
+
+          {routesError && (
+            <div className="error-banner" style={{ marginTop: 16 }}>
+              <span>{routesError}</span>
+              <button className="btn btn-sm btn-outline" onClick={fetchRoutes} style={{ marginLeft: 12 }}>
+                {t('common.retry', 'Retry')}
+              </button>
+            </div>
+          )}
+
+          {!routesLoading && !routesError && filteredRoutes.length === 0 && (
+            <div className="table-empty">
+              <div className="table-empty-icon">&#128652;</div>
+              <p>{searchTerm ? t('driver.noSearchResults', 'No routes match your search.') : t('driver.noRoutes', 'No active routes yet. Create your first route above.')}</p>
+            </div>
+          )}
+
+          {!routesLoading && !routesError && filteredRoutes.length > 0 && (
+            <div className="table-container">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>{t('driver.route', 'Route')}</th>
+                    <th>{t('driver.departure', 'Departure')}</th>
+                    <th>{t('driver.arrival', 'Arrival')}</th>
+                    <th>{t('driver.fare', 'Fare')}</th>
+                    <th>{t('driver.capacity', 'Capacity')}</th>
+                    <th>{t('driver.availability', 'Availability')}</th>
+                    <th>{t('common.action', 'Action')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedRoutes.map(route => (
+                    <tr key={route.id}>
+                      <td><strong>{route.source} &rarr; {route.destination}</strong></td>
+                      <td>{formatDate(route.departureTime)}</td>
+                      <td>{formatDate(route.arrivalTime)}</td>
+                      <td>&#8377;{route.fare}</td>
+                      <td>{route.capacity}</td>
+                      <td>
+                        <span className={`badge ${route.available ? 'badge-confirmed' : 'badge-cancelled'}`}>
+                          {route.available ? t('driver.available', 'Available') : t('driver.unavailable', 'Unavailable')}
+                        </span>
+                      </td>
+                      <td>
+                        <button
+                          className={`btn btn-sm ${route.available ? 'btn-outline-danger' : 'btn-outline-success'}`}
+                          onClick={() => handleToggleAvailability(route.id, route.available)}
+                          disabled={toggleLoading === route.id}
+                        >
+                          {toggleLoading === route.id
+                            ? t('common.loading', '...')
+                            : route.available
+                              ? t('driver.markUnavailable', 'Mark Unavailable')
+                              : t('driver.markAvailable', 'Mark Available')}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div style={{ padding: '12px 18px', display: 'flex', justifyContent: 'center' }}>
+                <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+              </div>
+            </div>
+          )}
         </ScrollReveal>
       </div>
     </div>

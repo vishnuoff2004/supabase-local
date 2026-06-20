@@ -28,8 +28,8 @@ jest.mock('react-i18next', () => ({
 
 const mockBookings = {
   data: [
-    { id: 1, route: 'Delhi → Mumbai', status: 'confirmed', travelDate: '2026-06-15' },
-    { id: 2, route: 'Mumbai → Goa', status: 'completed', travelDate: '2026-05-10' },
+    { id: 1, route: 'Delhi → Mumbai', status: 'confirmed', travelDate: '2026-06-15', totalAmount: '500.00', seatCount: 1 },
+    { id: 2, route: 'Mumbai → Goa', status: 'completed', travelDate: '2026-05-10', totalAmount: '1000.00', seatCount: 2 },
   ],
   totalPages: 1,
   page: 1,
@@ -69,6 +69,16 @@ describe('BookingHistoryPage — REQ-048, REQ-049, REQ-050', () => {
     await waitFor(() => {
       expect(screen.getByText('Booking #1')).toBeInTheDocument();
       expect(screen.getByText('Booking #2')).toBeInTheDocument();
+    });
+  });
+
+  test('TEST-026: displays fare in correct INR format in booking history', async () => {
+    const bookingService = require('../services/bookingService');
+    bookingService.getBookings.mockResolvedValue(mockBookings);
+    renderWithProviders();
+    await waitFor(() => {
+      expect(screen.getByText('₹500.00')).toBeInTheDocument();
+      expect(screen.getByText('₹1,000.00')).toBeInTheDocument();
     });
   });
 

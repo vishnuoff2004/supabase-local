@@ -6,6 +6,7 @@ import Button from '../../components/common/Button';
 import PriceRangeSlider from '../../components/common/PriceRangeSlider';
 import { ScrollReveal } from '../../hooks/useScrollAnimation';
 import { SkeletonCard } from '../../components/common/SkeletonLoader';
+import { formatPrice } from '../../utils/formatPrice';
 
 function useDebounce(value, delay) {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -53,9 +54,12 @@ function SearchPage() {
     updatePopupPos();
     window.addEventListener('scroll', updatePopupPos, true);
     window.addEventListener('resize', updatePopupPos);
+    const handleEscape = (e) => { if (e.key === 'Escape') setShowFilters(false); };
+    document.addEventListener('keydown', handleEscape);
     return () => {
       window.removeEventListener('scroll', updatePopupPos, true);
       window.removeEventListener('resize', updatePopupPos);
+      document.removeEventListener('keydown', handleEscape);
     };
   }, [showFilters, updatePopupPos]);
 
@@ -140,6 +144,26 @@ function SearchPage() {
                 {(seats || priceRange[0] > 0 || priceRange[1] < 10000) && <span className="search-filters-badge" />}
               </button>
             </div>
+            <button
+              className="btn btn-primary btn-sm"
+              onClick={() => {
+                const params = { source, destination };
+                if (seats) params.seats = seats;
+                if (priceRange[0] > 0) params.priceMin = priceRange[0];
+                if (priceRange[1] < 10000) params.priceMax = priceRange[1];
+                if (vehicleTypes.length > 0) params.vehicleTypes = vehicleTypes.join(',');
+                setLoading(true);
+                api.get('/routes/search', { params }).then(res => {
+                  setResults(res.data.data || []);
+                  setFacetCounts(res.data.facetCounts || null);
+                }).catch(() => {
+                  setResults([]);
+                  setFacetCounts(null);
+                }).finally(() => setLoading(false));
+              }}
+            >
+              {t('search.search', 'Search')}
+            </button>
           </div>
         </ScrollReveal>
 
@@ -256,7 +280,7 @@ function SearchPage() {
               const isMyBooking = r.bookedByMe;
 
               return (
-                <div key={r.id} className={`search-result-card${isBooked ? ' search-result-card--booked' : ''}`}>
+                <div key={r.id} className={`search-result-card${isBooked ? ' search-result-card--booked' : ''}`} tabIndex="0" role="region" aria-label={`${r.source} → ${r.destination}`}>
                   <div className="search-result-route">
                     <h3>
                       <span className="search-result-route-icon">📍</span>
@@ -286,7 +310,7 @@ function SearchPage() {
                     )}
                   </div>
                   <div className="search-result-actions">
-                    <div className="search-result-price">₹{r.fare}</div>
+                    <div className="search-result-price">{formatPrice(r.fare)}</div>
                     <div className="search-result-price-label">
                       {isBooked ? t('search.unavailable', 'Unavailable') : t('search.perSeat', 'per seat')}
                     </div>

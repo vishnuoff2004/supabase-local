@@ -97,3 +97,103 @@ describe('Dashboard APIs (REQ-022 to REQ-024)', () => {
     expect(res.status).toBe(403);
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TEST-142 — Admin dashboard (REQ-024)
+// Scenario: Admin logs in then views dashboard
+// Input:
+//   1. POST /api/auth/login as admin
+//   2. GET /api/dashboard/admin
+// Expected Output: totalUsers, totalAgencies, totalActiveBookings, bookingsByStatus
+// ─────────────────────────────────────────────────────────────────────────────
+describe('TEST-142 — Admin dashboard E2E flow (REQ-024)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('TEST-142: admin token grants access to dashboard with all required fields', async () => {
+    // Step 1: Simulate admin already logged in (token represents POST /api/auth/login result)
+    // In integration tests the token is pre-signed to represent a successful login response
+    const adminJwt = jwt.sign(
+      { id: 99, role: 'admin' },
+      process.env.JWT_SECRET || 'travel-agency-jwt-secret-dev'
+    );
+
+    // Step 2: Mock dashboard data counts
+    User.count.mockResolvedValue(25);
+    Agency.count.mockResolvedValue(6);
+    // Booking.count is called multiple times: total active, then per-status breakdown
+    Booking.count
+      .mockResolvedValueOnce(12)   // totalActiveBookings
+      .mockResolvedValueOnce(5)    // Pending
+      .mockResolvedValueOnce(4)    // Confirmed
+      .mockResolvedValueOnce(2)    // On Trip
+      .mockResolvedValueOnce(8)    // Completed
+      .mockResolvedValueOnce(3);   // Cancelled
+
+    // Step 3: Call GET /api/dashboard/admin with admin token
+    const res = await request(app)
+      .get('/api/dashboard/admin')
+      .set('Authorization', `Bearer ${adminJwt}`);
+
+    // Step 4: Assert all four required fields are present
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty('totalUsers');
+    expect(res.body).toHaveProperty('totalAgencies');
+    expect(res.body).toHaveProperty('totalActiveBookings');
+    expect(res.body).toHaveProperty('bookingsByStatus');
+
+    // Assert values are correct numbers
+    expect(typeof res.body.totalUsers).toBe('number');
+    expect(typeof res.body.totalAgencies).toBe('number');
+    expect(typeof res.body.totalActiveBookings).toBe('number');
+
+    // Assert bookingsByStatus is an object with status keys
+    expect(typeof res.body.bookingsByStatus).toBe('object');
+  });
+
+  test('TEST-142: dashboard response contains numeric counts (not null or undefined)', async () => {
+    User.count.mockResolvedValue(10);
+    Agency.count.mockResolvedValue(3);
+    Booking.count
+      .mockResolvedValueOnce(7)
+      .mockResolvedValueOnce(2)
+      .mockResolvedValueOnce(3)
+      .mockResolvedValueOnce(1)
+      .mockResolvedValueOnce(4)
+      .mockResolvedValueOnce(2);
+
+    const res = await request(app)
+      .get('/api/dashboard/admin')
+      .set('Authorization', `Bearer ${adminToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.totalUsers).not.toBeNull();
+    expect(res.body.totalUsers).not.toBeUndefined();
+    expect(res.body.totalAgencies).not.toBeNull();
+    expect(res.body.totalAgencies).not.toBeUndefined();
+    expect(res.body.totalActiveBookings).not.toBeNull();
+    expect(res.body.totalActiveBookings).not.toBeUndefined();
+    expect(res.body.bookingsByStatus).not.toBeNull();
+    expect(res.body.bookingsByStatus).not.toBeUndefined();
+  });
+
+  test('TEST-142: non-admin role cannot access dashboard — returns 403', async () => {
+    const travelerJwt = jwt.sign(
+      { id: 1, role: 'traveler' },
+      process.env.JWT_SECRET || 'travel-agency-jwt-secret-dev'
+    );
+
+    const res = await request(app)
+      .get('/api/dashboard/admin')
+      .set('Authorization', `Bearer ${travelerJwt}`);
+
+    expect(res.status).toBe(403);
+  });
+
+  test('TEST-142: unauthenticated request returns 401', async () => {
+    const res = await request(app).get('/api/dashboard/admin');
+    expect(res.status).toBe(401);
+  });
+});
+

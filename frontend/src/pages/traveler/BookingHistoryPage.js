@@ -6,6 +6,7 @@ import Pagination from '../../components/common/Pagination';
 import BookingStatusBadge from '../../components/BookingStatusBadge';
 import { ScrollReveal } from '../../hooks/useScrollAnimation';
 import { SkeletonList } from '../../components/common/SkeletonLoader';
+import { formatPrice } from '../../utils/formatPrice';
 
 function useDebounce(value, delay) {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -130,7 +131,7 @@ function BookingHistoryPage() {
                   <div className="booking-list-item-right">
                     {b.totalAmount && (
                       <div className="booking-list-item-fare">
-                        <span className="booking-fare-amount">₹{b.totalAmount}</span>
+                        <span className="booking-fare-amount">{formatPrice(b.totalAmount)}</span>
                         <span className="booking-fare-label">{b.seatCount} seat{b.seatCount > 1 ? 's' : ''}</span>
                       </div>
                     )}

@@ -61,10 +61,11 @@ registerRoute(
     cacheName: 'api-responses',
     plugins: [
       new ExpirationPlugin({ maxEntries: 50, maxAgeSeconds: 5 * 60 }),
-      new CacheableResponsePlugin({ statuses: [0, 200] }),
+      new CacheableResponsePlugin({ statuses: [0, 200, 401, 403, 404] }),
     ],
     networkTimeoutSeconds: 10,
-  })
+  }),
+  'GET'
 );
 
 self.addEventListener('message', (event) => {

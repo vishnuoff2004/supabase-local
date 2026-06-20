@@ -37,7 +37,7 @@ function BookingPage() {
     return (
       <div className="booking-page">
         <div className="container">
-          <div className="success-state">
+          <div className="success-state" role="status" aria-live="polite">
             <div className="success-state-icon">✓</div>
             <h2>{t('booking.bookingConfirmed', 'Booking Confirmed!')}</h2>
             <p className="text-muted mt-sm">{t('booking.redirecting', 'Redirecting to your bookings...')}</p>

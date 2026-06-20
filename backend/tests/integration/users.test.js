@@ -61,3 +61,59 @@ describe('TEST-017 to TEST-019 — User Profile APIs (REQ-005)', () => {
     expect(res.body.message).toMatch(/re-authentication/i);
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TEST-106 — Password not in API response (REQ-032)
+// ─────────────────────────────────────────────────────────────────────────────
+describe('TEST-106 — Password not in API response (REQ-032)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('TEST-106: GET /api/users/profile must NOT return password field', async () => {
+    // Even if the service mistakenly includes password in resolved object,
+    // the controller/serializer must strip it before sending the response.
+    userService.getProfile.mockResolvedValue({
+      id: 1,
+      name: 'John Doe',
+      email: 'john@example.com',
+      phone: '+911234567890',
+      role: 'traveler',
+      // intentionally include to verify controller strips it
+      password: 'ShouldNeverAppear',
+      passwordHash: 'ShouldNeverAppearEither',
+    });
+
+    const res = await request(app)
+      .get('/api/users/profile')
+      .set('Authorization', `Bearer ${testToken}`);
+
+    expect(res.status).toBe(200);
+    // Core assertion: password fields must not be present
+    expect(res.body).not.toHaveProperty('password');
+    expect(res.body).not.toHaveProperty('passwordHash');
+    // Verify legitimate fields are still present
+    expect(res.body).toHaveProperty('id', 1);
+    expect(res.body).toHaveProperty('email', 'john@example.com');
+  });
+
+  test('TEST-106: response body must not contain any key matching /password/i', async () => {
+    userService.getProfile.mockResolvedValue({
+      id: 2,
+      name: 'Jane Doe',
+      email: 'jane@example.com',
+      role: 'driver',
+    });
+
+    const res = await request(app)
+      .get('/api/users/profile')
+      .set('Authorization', `Bearer ${testToken}`);
+
+    expect(res.status).toBe(200);
+
+    const responseKeys = Object.keys(res.body);
+    const passwordKeys = responseKeys.filter(k => /password/i.test(k));
+    expect(passwordKeys).toHaveLength(0);
+  });
+});
+

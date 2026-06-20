@@ -32,7 +32,7 @@ describe('Phase 2 Auth — Socket Authentication', () => {
     });
   });
 
-  test('authenticateSocket rejects expired token', (done) => {
+  test('authenticateSocket rejects expired token — TEST-153', (done) => {
     const { authenticateSocket } = require('../../src/socket/authenticateSocket');
     const socket = mockSocket(expiredToken);
     authenticateSocket(['traveler'])(socket, (err) => {
@@ -42,7 +42,7 @@ describe('Phase 2 Auth — Socket Authentication', () => {
     });
   });
 
-  test('authenticateSocket rejects malformed token', (done) => {
+  test('authenticateSocket rejects malformed token — TEST-153', (done) => {
     const { authenticateSocket } = require('../../src/socket/authenticateSocket');
     const socket = mockSocket(invalidToken);
     authenticateSocket(['traveler'])(socket, (err) => {
@@ -52,7 +52,7 @@ describe('Phase 2 Auth — Socket Authentication', () => {
     });
   });
 
-  test('authenticateSocket rejects missing token', (done) => {
+  test('authenticateSocket rejects missing token — TEST-153', (done) => {
     const { authenticateSocket } = require('../../src/socket/authenticateSocket');
     const socket = mockSocket(undefined);
     authenticateSocket(['traveler'])(socket, (err) => {
@@ -62,7 +62,7 @@ describe('Phase 2 Auth — Socket Authentication', () => {
     });
   });
 
-  test('authenticateSocket rejects role mismatch', (done) => {
+  test('authenticateSocket rejects role mismatch — TEST-154', (done) => {
     const { authenticateSocket } = require('../../src/socket/authenticateSocket');
     const socket = mockSocket(validToken);
     authenticateSocket(['admin'])(socket, (err) => {

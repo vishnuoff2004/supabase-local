@@ -6,6 +6,7 @@ const router = Router();
 
 router.post('/profile', authorize('driver', 'admin'), driverController.createProfile);
 router.put('/profile', authorize('driver', 'admin'), driverController.updateProfile);
+router.get('/routes', authorize('driver', 'admin'), driverController.getRoutes);
 router.post('/routes', authorize('driver', 'admin'), driverController.createRoute);
 router.put('/routes/:id/availability', authorize('driver', 'admin'), driverController.setRouteAvailability);
 router.put('/bookings/:id/accept', authorize('driver', 'admin'), driverController.acceptBooking);

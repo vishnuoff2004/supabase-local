@@ -24,7 +24,9 @@
     "eject": "react-scripts eject",
     "generate-icons": "node scripts/generate-icons.js",
     "prebuild": "npm run generate-icons || echo 'Icon generation skipped (non-fatal)'",
-    "tunnel": "npx ngrok http 3000 --domain=outward-likewise-dolphin.ngrok-free.dev"
+    "tunnel": "npx ngrok http 3000 --domain=outward-likewise-dolphin.ngrok-free.dev",
+    "test:e2e": "playwright test --config=playwright.config.js",
+    "test:e2e:report": "playwright show-report playwright-report"
   },
   "proxy": "http://localhost:5000",
   "browserslist": {
@@ -40,6 +42,7 @@
     ]
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.0",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",

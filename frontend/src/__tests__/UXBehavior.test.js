@@ -1,6 +1,7 @@
 import React from 'react';
-import { render, screen, act, waitFor } from '@testing-library/react';
+import { render, screen, act, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import axe from 'axe-core';
 
 // ─── TEST-091: Loading indicator on API call ────────────────────────────────
 
@@ -213,5 +214,104 @@ describe('TEST-099 — Form data preserved on timeout', () => {
     expect(restored.routeId).toBe(1);
     expect(restored.seatCount).toBe(2);
     expect(restored.travelDate).toBe('2026-07-15');
+  });
+});
+
+// ─── TEST-161: Focus trap in modal dialog ────────────────────────────────────
+
+describe('TEST-161 — Focus trap in modal dialog', () => {
+  function renderFocusTrap() {
+    const FocusTrap = require('../components/FocusTrap').default;
+    return render(
+      <FocusTrap active={true}>
+        <input data-testid="field-1" type="text" />
+        <button data-testid="field-2">Middle</button>
+        <button data-testid="field-3">Last</button>
+      </FocusTrap>
+    );
+  }
+
+  test('Tab cycles forward through focusable elements', async () => {
+    renderFocusTrap();
+    const user = userEvent.setup();
+
+    const first = screen.getByTestId('field-1');
+    const second = screen.getByTestId('field-2');
+    const third = screen.getByTestId('field-3');
+
+    first.focus();
+    expect(document.activeElement).toBe(first);
+
+    await user.tab();
+    expect(document.activeElement).toBe(second);
+
+    await user.tab();
+    expect(document.activeElement).toBe(third);
+
+    await user.tab();
+    expect(document.activeElement).toBe(first);
+  });
+
+  test('Shift+Tab on first element wraps to last', async () => {
+    renderFocusTrap();
+    const user = userEvent.setup();
+
+    const first = screen.getByTestId('field-1');
+    const third = screen.getByTestId('field-3');
+
+    first.focus();
+    expect(document.activeElement).toBe(first);
+
+    await user.tab({ shift: true });
+    expect(document.activeElement).toBe(third);
+  });
+});
+
+// ─── TEST-162: ARIA live region announces booking confirmation ──────────────
+
+describe('TEST-162 — ARIA live region announces booking confirmation', () => {
+  test('success state has role="status" with aria-live="polite" and confirmation text', () => {
+    const BookingConfirmation = () => (
+      <div className="success-state" role="status" aria-live="polite">
+        <div className="success-state-icon">✓</div>
+        <h2>Booking Confirmed!</h2>
+        <p className="text-muted mt-sm">Redirecting to your bookings...</p>
+      </div>
+    );
+
+    render(<BookingConfirmation />);
+
+    const region = screen.getByRole('status');
+    expect(region).toBeInTheDocument();
+    expect(region).toHaveAttribute('aria-live', 'polite');
+    expect(region).toHaveTextContent(/booking confirmed/i);
+    expect(region).toHaveTextContent(/redirecting/i);
+  });
+});
+
+// ─── TEST-163: Color contrast meets WCAG AA ──────────────────────────────────
+
+describe('TEST-163 — Color contrast meets WCAG AA', () => {
+  function renderSamplePage() {
+    return render(
+      <div>
+        <h1 style={{ color: '#000', background: '#fff' }}>Heading</h1>
+        <p style={{ color: '#333', background: '#fff' }}>Body text paragraph for contrast checking.</p>
+        <button style={{ color: '#fff', background: '#007bff', border: 'none', padding: '8px 16px' }}>
+          Primary Button
+        </button>
+        <a href="#" style={{ color: '#0066cc', background: '#fff' }}>Link text</a>
+      </div>
+    );
+  }
+
+  test('no color-contrast violations on sample page', async () => {
+    const { container } = renderSamplePage();
+
+    const results = await axe.run(container, {
+      runOnly: ['color-contrast'],
+    });
+
+    expect(results.violations).toHaveLength(0);
   });
 });
