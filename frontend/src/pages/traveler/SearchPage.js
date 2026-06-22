@@ -145,7 +145,7 @@ function SearchPage() {
               </button>
             </div>
             <button
-              className="btn btn-primary btn-sm"
+              className="btn btn-primary"
               onClick={() => {
                 const params = { source, destination };
                 if (seats) params.seats = seats;

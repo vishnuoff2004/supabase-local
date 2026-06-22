@@ -149,93 +149,110 @@ function RouteManagementPage() {
           </div>
         </ScrollReveal>
 
-        <ScrollReveal className="animate-fade-up" style={{ marginTop: 32 }}>
-          <div className="admin-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-            <div>
-              <h2 className="admin-title" style={{ fontSize: '1.25rem' }}>{t('driver.myRoutes', 'My Routes')}</h2>
-            </div>
-            <input
-              className="form-input"
-              style={{ maxWidth: 280 }}
-              placeholder={t('driver.searchRoutes', 'Search routes...')}
-              value={searchTerm}
-              onChange={e => { setSearchTerm(e.target.value); setPage(1); }}
-            />
-          </div>
-
-          {routesLoading && (
-            <div className="table-loading">
-              <div className="skeleton" style={{ height: 40, marginBottom: 8 }} />
-              <div className="skeleton" style={{ height: 40, marginBottom: 8 }} />
-              <div className="skeleton" style={{ height: 40 }} />
-            </div>
-          )}
-
-          {routesError && (
-            <div className="error-banner" style={{ marginTop: 16 }}>
-              <span>{routesError}</span>
-              <button className="btn btn-sm btn-outline" onClick={fetchRoutes} style={{ marginLeft: 12 }}>
-                {t('common.retry', 'Retry')}
-              </button>
-            </div>
-          )}
-
-          {!routesLoading && !routesError && filteredRoutes.length === 0 && (
-            <div className="table-empty">
-              <div className="table-empty-icon">&#128652;</div>
-              <p>{searchTerm ? t('driver.noSearchResults', 'No routes match your search.') : t('driver.noRoutes', 'No active routes yet. Create your first route above.')}</p>
-            </div>
-          )}
-
-          {!routesLoading && !routesError && filteredRoutes.length > 0 && (
-            <div className="table-container">
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>{t('driver.route', 'Route')}</th>
-                    <th>{t('driver.departure', 'Departure')}</th>
-                    <th>{t('driver.arrival', 'Arrival')}</th>
-                    <th>{t('driver.fare', 'Fare')}</th>
-                    <th>{t('driver.capacity', 'Capacity')}</th>
-                    <th>{t('driver.availability', 'Availability')}</th>
-                    <th>{t('common.action', 'Action')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedRoutes.map(route => (
-                    <tr key={route.id}>
-                      <td><strong>{route.source} &rarr; {route.destination}</strong></td>
-                      <td>{formatDate(route.departureTime)}</td>
-                      <td>{formatDate(route.arrivalTime)}</td>
-                      <td>&#8377;{route.fare}</td>
-                      <td>{route.capacity}</td>
-                      <td>
-                        <span className={`badge ${route.available ? 'badge-confirmed' : 'badge-cancelled'}`}>
-                          {route.available ? t('driver.available', 'Available') : t('driver.unavailable', 'Unavailable')}
-                        </span>
-                      </td>
-                      <td>
-                        <button
-                          className={`btn btn-sm ${route.available ? 'btn-outline-danger' : 'btn-outline-success'}`}
-                          onClick={() => handleToggleAvailability(route.id, route.available)}
-                          disabled={toggleLoading === route.id}
-                        >
-                          {toggleLoading === route.id
-                            ? t('common.loading', '...')
-                            : route.available
-                              ? t('driver.markUnavailable', 'Mark Unavailable')
-                              : t('driver.markAvailable', 'Mark Available')}
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <div style={{ padding: '12px 18px', display: 'flex', justifyContent: 'center' }}>
-                <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+        <ScrollReveal className="animate-fade-up">
+          <div className="route-table-section">
+            <div className="route-table-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <h2>{t('driver.myRoutes', 'My Routes')}</h2>
+                {filteredRoutes.length > 0 && (
+                  <span className="route-count-badge">{filteredRoutes.length}</span>
+                )}
               </div>
+              <input
+                className="form-input"
+                placeholder={t('driver.searchRoutes', 'Search routes...')}
+                value={searchTerm}
+                onChange={e => { setSearchTerm(e.target.value); setPage(1); }}
+              />
             </div>
-          )}
+
+            {routesLoading && (
+              <div className="table-loading">
+                <div className="skeleton" style={{ height: 40, marginBottom: 8 }} />
+                <div className="skeleton" style={{ height: 40, marginBottom: 8 }} />
+                <div className="skeleton" style={{ height: 40 }} />
+              </div>
+            )}
+
+            {routesError && (
+              <div style={{ padding: 24 }}>
+                <div className="error-banner">
+                  <span>{routesError}</span>
+                  <button className="btn btn-sm btn-outline" onClick={fetchRoutes} style={{ marginLeft: 12 }}>
+                    {t('common.retry', 'Retry')}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {!routesLoading && !routesError && filteredRoutes.length === 0 && (
+              <div className="table-empty">
+                <div className="table-empty-icon">&#128652;</div>
+                <p>{searchTerm ? t('driver.noSearchResults', 'No routes match your search.') : t('driver.noRoutes', 'No active routes yet. Create your first route above.')}</p>
+              </div>
+            )}
+
+            {!routesLoading && !routesError && filteredRoutes.length > 0 && (
+              <>
+                <div className="table-container" style={{ boxShadow: 'none', borderRadius: 0 }}>
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th>{t('driver.route', 'Route')}</th>
+                        <th>{t('driver.departure', 'Departure')}</th>
+                        <th>{t('driver.arrival', 'Arrival')}</th>
+                        <th>{t('driver.fare', 'Fare')}</th>
+                        <th>{t('driver.capacity', 'Capacity')}</th>
+                        <th>{t('driver.availability', 'Availability')}</th>
+                        <th>{t('common.action', 'Action')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {paginatedRoutes.map(route => (
+                        <tr key={route.id}>
+                          <td>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                              <span style={{ fontSize: '1.1rem' }}>&#128205;</span>
+                              <strong>{route.source} &rarr; {route.destination}</strong>
+                            </div>
+                          </td>
+                          <td style={{ whiteSpace: 'nowrap' }}>{formatDate(route.departureTime)}</td>
+                          <td style={{ whiteSpace: 'nowrap' }}>{formatDate(route.arrivalTime)}</td>
+                          <td><strong style={{ color: 'var(--color-accent)' }}>&#8377;{route.fare}</strong></td>
+                          <td>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                              &#128100; {route.capacity}
+                            </span>
+                          </td>
+                          <td>
+                            <span className={`badge ${route.available ? 'badge-confirmed' : 'badge-cancelled'}`}>
+                              {route.available ? t('driver.available', 'Available') : t('driver.unavailable', 'Unavailable')}
+                            </span>
+                          </td>
+                          <td>
+                            <button
+                              className={`btn btn-sm ${route.available ? 'btn-outline-danger' : 'btn-outline-success'}`}
+                              onClick={() => handleToggleAvailability(route.id, route.available)}
+                              disabled={toggleLoading === route.id}
+                            >
+                              {toggleLoading === route.id
+                                ? '...'
+                                : route.available
+                                  ? t('driver.markUnavailable', 'Mark Unavailable')
+                                  : t('driver.markAvailable', 'Mark Available')}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div style={{ padding: '16px 24px', display: 'flex', justifyContent: 'center', borderTop: '1px solid var(--color-border)' }}>
+                  <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+                </div>
+              </>
+            )}
+          </div>
         </ScrollReveal>
       </div>
     </div>
