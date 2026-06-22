@@ -10,8 +10,8 @@ const sequelize = new Sequelize(config.database, config.username, config.passwor
 
 sequelize
   .authenticate()
-  .then(() => console.log('MySQL connected successfully'))
-  .catch((err) => console.error('MySQL connection failed:', err.message));
+  .then(() => console.log('PostgreSQL connected successfully'))
+  .catch((err) => console.error('PostgreSQL connection failed:', err.message));
 
 const db = {};
 

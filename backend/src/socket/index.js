@@ -17,7 +17,19 @@ function createSocketServer(httpServer) {
   if (process.env.REDIS_URL) {
     const pubClient = createClient({ url: process.env.REDIS_URL });
     const subClient = pubClient.duplicate();
-    io.adapter(createAdapter(pubClient, subClient));
+    pubClient.on('error', (err) => {
+      console.warn('Redis pub client error (falling back to in-memory adapter):', err.message);
+    });
+    subClient.on('error', (err) => {
+      console.warn('Redis sub client error (falling back to in-memory adapter):', err.message);
+    });
+    Promise.all([pubClient.connect(), subClient.connect()])
+      .then(() => {
+        io.adapter(createAdapter(pubClient, subClient));
+      })
+      .catch((err) => {
+        console.warn('Redis connection failed (falling back to in-memory adapter):', err.message);
+      });
   }
 
   const bookingsNamespace = io.of('/bookings');

@@ -1,7 +1,8 @@
-const { verifyToken } = require('../utils/jwt');
+const supabaseAdmin = require('../config/supabase');
+const { User } = require('../models');
 
 function authenticateSocket(allowedRoles) {
-  return (socket, next) => {
+  return async (socket, next) => {
     try {
       const token = socket.handshake.auth?.token || socket.handshake.query?.token;
 
@@ -11,20 +12,27 @@ function authenticateSocket(allowedRoles) {
         return next(err);
       }
 
-      const decoded = verifyToken(token);
-      if (!decoded || !decoded.id || !decoded.role) {
-        const err = new Error('Invalid token payload');
-        err.data = { code: 4001, message: 'Invalid token payload' };
+      const { data: { user: authUser }, error } = await supabaseAdmin.auth.getUser(token);
+      if (error || !authUser) {
+        const err = new Error('Invalid or expired token');
+        err.data = { code: 4001, message: 'Invalid or expired token' };
         return next(err);
       }
 
-      if (allowedRoles && allowedRoles.length > 0 && !allowedRoles.includes(decoded.role)) {
+      const dbUser = await User.findOne({ where: { supabaseUid: authUser.id } });
+      if (!dbUser || !dbUser.active) {
         const err = new Error('Forbidden: insufficient role');
         err.data = { code: 4003, message: 'Forbidden: insufficient role' };
         return next(err);
       }
 
-      socket.user = { id: decoded.id, role: decoded.role };
+      if (allowedRoles && allowedRoles.length > 0 && !allowedRoles.includes(dbUser.role)) {
+        const err = new Error('Forbidden: insufficient role');
+        err.data = { code: 4003, message: 'Forbidden: insufficient role' };
+        return next(err);
+      }
+
+      socket.user = { id: dbUser.id, role: dbUser.role, supabaseUid: authUser.id };
       next();
     } catch (err) {
       const error = new Error('Authentication failed');

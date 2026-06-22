@@ -5,10 +5,11 @@ import { useAuth } from './AuthContext';
 const SocketContext = createContext(null);
 
 export function SocketProvider({ children }) {
-  const { user, token } = useAuth();
+  const { session, user } = useAuth();
   const [isConnected, setIsConnected] = useState(false);
   const [connectionError, setConnectionError] = useState(null);
   const [namespace, setNamespace] = useState('/');
+  const token = session?.access_token || localStorage.getItem('supabase_token');
 
   useEffect(() => {
     if (!token) {

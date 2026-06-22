@@ -7,6 +7,8 @@ import MainLayout from './layouts/MainLayout';
 import AuthLayout from './layouts/AuthLayout';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
+import AuthCallback from './pages/auth/AuthCallback';
+import CompleteProfilePage from './pages/auth/CompleteProfilePage';
 import SearchPage from './pages/traveler/SearchPage';
 import BookingPage from './pages/traveler/BookingPage';
 import BookingHistoryPage from './pages/traveler/BookingHistoryPage';
@@ -35,6 +37,8 @@ function AppRoutes() {
       <Route element={<AuthLayout />}>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/auth/complete-profile" element={<CompleteProfilePage />} />
         <Route path="/debug/sentry" element={<SentryDebugPage />} />
       </Route>
       <Route element={<ProtectedRoute />}>

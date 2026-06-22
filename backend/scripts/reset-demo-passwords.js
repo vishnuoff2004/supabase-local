@@ -1,37 +1,35 @@
 /**
- * Script to reset demo agency admin passwords to known values
+ * Resets demo user passwords in Supabase Auth.
  * Run: node scripts/reset-demo-passwords.js
  */
-require('dotenv').config();
-const bcrypt = require('bcrypt');
-const { Sequelize } = require('sequelize');
+require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
+const supabaseAdmin = require('../src/config/supabase');
 
-const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASS,
-  { host: process.env.DB_HOST, dialect: 'mysql', logging: false }
-);
+const DEMOS = [
+  { email: 'hari@gmail.com', password: 'Hari@123' },
+  { email: 'agency@example.com', password: 'Agency@123' },
+  { email: 'john@gmail.com', password: 'John@123' },
+];
 
 async function main() {
-  await sequelize.authenticate();
+  for (const demo of DEMOS) {
+    const { data: { users }, error: listErr } = await supabaseAdmin.auth.admin.listUsers();
+    if (listErr) { console.error('Error listing users:', listErr.message); continue; }
 
-  const demos = [
-    { email: 'hari@gmail.com', password: 'Hari@123' },
-    { email: 'agency@example.com', password: 'Agency@123' },
-    { email: 'john@gmail.com', password: 'John@123' },
-  ];
+    const user = users.find(u => u.email === demo.email);
+    if (!user) {
+      console.log(`User ${demo.email} not found in auth. Create via sync-demo-auth.js first.`);
+      continue;
+    }
 
-  for (const demo of demos) {
-    const hash = await bcrypt.hash(demo.password, 10);
-    const [count] = await sequelize.query(
-      `UPDATE Users SET password=? WHERE email=?`,
-      { replacements: [hash, demo.email] }
-    );
-    console.log(`Reset password for ${demo.email}: ${demo.password}`);
+    const { error } = await supabaseAdmin.auth.admin.updateUserById(user.id, { password: demo.password });
+    if (error) {
+      console.error(`Failed to reset password for ${demo.email}: ${error.message}`);
+    } else {
+      console.log(`Reset password for ${demo.email}: ${demo.password}`);
+    }
   }
 
-  await sequelize.close();
   console.log('Done!');
 }
 

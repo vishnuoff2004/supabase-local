@@ -1,12 +1,15 @@
 const { Router } = require('express');
 const authController = require('../controllers/authController');
+const { authenticate } = require('../middleware/auth');
 const { handleUploads } = require('../middleware/upload');
 
 const router = Router();
 
 router.post('/register', handleUploads, authController.register);
-router.post('/verify-otp', authController.verifyOtp);
-router.post('/resend-otp', authController.resendOtp);
-router.post('/login', authController.login);
+router.post('/complete-registration', authController.completeRegistration);
+router.post('/oauth-setup', authController.oauthSetup);
+router.get('/me', authenticate, authController.getMe);
+router.post('/setup-role', authenticate, authController.setupRole);
+router.patch('/profile', authenticate, authController.updateProfile);
 
 module.exports = router;

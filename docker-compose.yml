@@ -1,24 +1,6 @@
 version: '3.8'
 
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: travel-mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: travel_agency
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql-data:/var/lib/mysql
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    restart: unless-stopped
-
   redis:
     image: redis:7-alpine
     container_name: travel-redis
@@ -39,17 +21,14 @@ services:
     ports:
       - "8080:8080"
     environment:
-      DB_HOST: mysql
-      DB_USER: root
-      DB_PASS: root
-      DB_NAME: travel_agency
-      JWT_SECRET: change_this_in_production
+      SUPABASE_URL: https://ocitfrymaztioctnbzcc.supabase.co
+      SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jaXRmcnltYXp0aW9jdG5iemNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwOTg5NDcsImV4cCI6MjA5NzY3NDk0N30.kDd_75zs5MHDXY11uu_praPAL_XM6rXCVzdb0cux058
+      SUPABASE_SERVICE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jaXRmcnltYXp0aW9jdG5iemNjIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MjA5ODk0NywiZXhwIjoyMDk3Njc0OTQ3fQ.aWiqMaf95yRnU43aAQqB8nLwmeAI2R-yOXrQ7TH8cM4
+      DATABASE_URL: postgresql://postgres:vishnu%40oct2004@db.ocitfrymaztioctnbzcc.supabase.co:5432/travel_agency
       PORT: 8080
       NODE_ENV: production
       REDIS_URL: redis://redis:6379
     depends_on:
-      mysql:
-        condition: service_healthy
       redis:
         condition: service_healthy
     restart: unless-stopped
@@ -62,6 +41,8 @@ services:
     environment:
       REACT_APP_API_URL: http://localhost:8080/api
       REACT_APP_SOCKET_URL: http://localhost:8080
+      REACT_APP_SUPABASE_URL: https://ocitfrymaztioctnbzcc.supabase.co
+      REACT_APP_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jaXRmcnltYXp0aW9jdG5iemNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwOTg5NDcsImV4cCI6MjA5NzY3NDk0N30.kDd_75zs5MHDXY11uu_praPAL_XM6rXCVzdb0cux058
     depends_on:
       - backend
     restart: unless-stopped
@@ -105,7 +86,6 @@ services:
     restart: unless-stopped
 
 volumes:
-  mysql-data:
   redis-data:
   prometheus-data:
   grafana-data:

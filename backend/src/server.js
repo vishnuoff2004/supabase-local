@@ -12,6 +12,7 @@ initSentry(app);
 const httpServer = createServer(app);
 
 const io = createSocketServer(httpServer);
+app.set('io', io);
 
 app.set('io', io);
 
