@@ -2,20 +2,35 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
 
-jest.mock('../services/api');
+const mockGetSession = jest.fn();
+const mockOnAuthStateChange = jest.fn();
+const mockSignInWithPassword = jest.fn();
+const mockSignOut = jest.fn();
 
-function makeToken(payload) {
-  const encoded = btoa(JSON.stringify(payload));
-  return `header.${encoded}.signature`;
-}
+jest.mock('../services/supabase', () => ({
+  __esModule: true,
+  default: {
+    auth: {
+      getSession: (...args) => mockGetSession(...args),
+      onAuthStateChange: (...args) => mockOnAuthStateChange(...args),
+      signInWithPassword: (...args) => mockSignInWithPassword(...args),
+      signOut: (...args) => mockSignOut(...args),
+    },
+  },
+}));
+
+jest.mock('../services/api', () => ({
+  __esModule: true,
+  default: { get: jest.fn(), post: jest.fn() },
+}));
 
 function TestComponent() {
-  const { user, token, loading, error, login, register, logout } = useAuth();
+  const { user, session, loading, error, login, register, logout } = useAuth();
   return (
     <div>
       <div data-testid="loading">{loading.toString()}</div>
       <div data-testid="user">{user ? JSON.stringify(user) : 'null'}</div>
-      <div data-testid="token">{token || 'null'}</div>
+      <div data-testid="token">{session?.access_token || 'null'}</div>
       <div data-testid="error">{error || 'null'}</div>
       <button data-testid="login" onClick={() => login('test@test.com', 'pass')}>Login</button>
       <button data-testid="register" onClick={() => register({ name: 'Test' })}>Register</button>
@@ -26,7 +41,10 @@ function TestComponent() {
 
 describe('AuthContext', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     localStorage.clear();
+    mockGetSession.mockResolvedValue({ data: { session: null } });
+    mockOnAuthStateChange.mockReturnValue({ data: { subscription: { unsubscribe: jest.fn() } } });
   });
 
   test('should start with loading true then false', async () => {
@@ -49,19 +67,6 @@ describe('AuthContext', () => {
     await waitFor(() => {
       expect(screen.getByTestId('user').textContent).toBe('null');
       expect(screen.getByTestId('token').textContent).toBe('null');
-    });
-  });
-
-  test('should set user from stored token', async () => {
-    const token = makeToken({ id: 1, role: 'traveler', exp: Date.now() / 1000 + 3600 });
-    localStorage.setItem('token', token);
-    render(
-      <AuthProvider>
-        <TestComponent />
-      </AuthProvider>
-    );
-    await waitFor(() => {
-      expect(screen.getByTestId('token').textContent).toBe(token);
     });
   });
 });

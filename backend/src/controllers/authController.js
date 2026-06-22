@@ -1,5 +1,5 @@
 const authService = require('../services/authService');
-const { validateRegister, validateLogin } = require('../validations/authValidation');
+const { validateRegister } = require('../validations/authValidation');
 
 async function register(req, res, next) {
   try {
@@ -23,55 +23,65 @@ async function register(req, res, next) {
   }
 }
 
-async function verifyOtp(req, res, next) {
+async function getMe(req, res, next) {
   try {
-    const { email, otp } = req.body;
-    if (!email || !otp) {
-      return res.status(400).json({ message: 'Email and OTP are required.' });
-    }
-    const result = await authService.verifyOtp(email, otp);
-    res.status(200).json(result);
+    const user = await authService.getMe(req.user.id);
+    res.status(200).json(user);
   } catch (err) {
-    const status = err.status || 400;
-    if ([400, 401, 404, 410].includes(status)) {
-      return res.status(status).json({ message: err.message });
-    }
+    if (err.status === 404) return res.status(404).json({ message: err.message });
     next(err);
   }
 }
 
-async function resendOtp(req, res, next) {
+async function setupRole(req, res, next) {
   try {
-    const { email } = req.body;
-    if (!email) return res.status(400).json({ message: 'Email is required.' });
-    const result = await authService.resendOtp(email);
+    const result = await authService.setupRole(req.user.id, req.body);
     res.status(200).json(result);
   } catch (err) {
-    const status = err.status || 400;
-    if ([400, 404].includes(status)) {
-      return res.status(status).json({ message: err.message });
-    }
+    if (err.status === 404) return res.status(404).json({ message: err.message });
     next(err);
   }
 }
 
-async function login(req, res, next) {
+async function updateProfile(req, res, next) {
   try {
-    const validation = validateLogin(req.body);
-    if (validation.error) {
-      return res.status(400).json({
-        message: validation.error.details[0].message,
-        errors: validation.error.details.map(d => d.message),
-      });
-    }
-    const result = await authService.login(req.body.email, req.body.password);
-    res.status(200).json(result);
+    const user = await authService.getMe(req.user.id);
+    const allowedFields = ['name', 'phone'];
+    allowedFields.forEach(field => {
+      if (req.body[field] !== undefined) user[field] = req.body[field];
+    });
+    await user.save();
+    res.status(200).json({ message: 'Profile updated', user: user });
   } catch (err) {
-    if (err.status === 401 || err.status === 403 || err.status === 429) {
-      return res.status(err.status).json({ message: err.message });
-    }
     next(err);
   }
 }
 
-module.exports = { register, verifyOtp, resendOtp, login };
+async function completeRegistration(req, res, next) {
+  try {
+    const result = await authService.completeRegistration(req.body);
+    res.status(200).json(result);
+  } catch (err) {
+    if (err.status === 401) return res.status(401).json({ message: err.message });
+    if (err.status === 404) return res.status(404).json({ message: err.message });
+    if (err.status === 409) return res.status(409).json({ message: err.message });
+    next(err);
+  }
+}
+
+async function oauthSetup(req, res, next) {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ message: 'No token provided' });
+    }
+    const result = await authService.oauthSetup({ ...req.body, accessToken: token });
+    res.status(200).json(result);
+  } catch (err) {
+    if (err.status === 401) return res.status(401).json({ message: err.message });
+    if (err.status === 400) return res.status(400).json({ message: err.message });
+    next(err);
+  }
+}
+
+module.exports = { register, completeRegistration, getMe, setupRole, updateProfile, oauthSetup };

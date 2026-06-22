@@ -2,11 +2,17 @@ require('dotenv').config();
 
 module.exports = {
   development: {
-    username: process.env.DB_USER || 'root',
+    username: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASS || '',
     database: process.env.DB_NAME || 'travel_agency',
     host: process.env.DB_HOST || 'localhost',
-    dialect: 'mysql',
+    dialect: 'postgres',
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false,
+      },
+    },
     logging: process.env.DB_LOGGING === 'true' ? console.log : false,
     pool: {
       max: 10,
@@ -16,11 +22,17 @@ module.exports = {
     },
   },
   test: {
-    username: process.env.DB_USER || 'root',
+    username: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASS || '',
     database: process.env.DB_NAME || 'travel_agency_test',
     host: process.env.DB_HOST || 'localhost',
-    dialect: 'mysql',
+    dialect: 'postgres',
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false,
+      },
+    },
     logging: false,
   },
   production: {
@@ -28,7 +40,13 @@ module.exports = {
     password: process.env.DB_PASS,
     database: process.env.DB_NAME,
     host: process.env.DB_HOST,
-    dialect: 'mysql',
+    dialect: 'postgres',
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false,
+      },
+    },
     logging: false,
     pool: {
       max: 10,

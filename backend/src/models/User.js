@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
       id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
       name: { type: DataTypes.STRING, allowNull: false },
       email: { type: DataTypes.STRING, allowNull: false, unique: true },
-      password: { type: DataTypes.STRING, allowNull: false },
+      password: { type: DataTypes.STRING, allowNull: true },
       phone: { type: DataTypes.STRING, allowNull: false },
       role: {
         type: DataTypes.ENUM('traveler', 'driver', 'agency_admin', 'admin'),
@@ -26,6 +26,7 @@ module.exports = (sequelize, DataTypes) => {
       otpCode: { type: DataTypes.STRING(6), allowNull: true },
       otpExpiry: { type: DataTypes.DATE, allowNull: true },
       isVerified: { type: DataTypes.BOOLEAN, defaultValue: false },
+      supabaseUid: { type: DataTypes.UUID, allowNull: true, unique: true },
     },
     { sequelize, modelName: 'User', timestamps: true }
   );

@@ -1,217 +1,284 @@
-const bcrypt = require('bcrypt');
 const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
+const { Client } = require('pg');
+const supabaseAdmin = require('../config/supabase');
 const { User, Driver, Agency } = require('../models');
-const { generateToken } = require('../utils/jwt');
-const { sendOtpEmail } = require('./emailService');
+const { sendWelcomeEmail } = require('./emailService');
 
-/* ── helpers ── */
-function generateOtp() {
-  return String(crypto.randomInt(100000, 999999)); // secure 6-digit OTP
+async function queryDB(text, params) {
+  const client = new Client({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false },
+  });
+  await client.connect();
+  try {
+    return await client.query(text, params);
+  } finally {
+    await client.end();
+  }
 }
 
-function otpExpiry() {
-  return new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
+async function setAuthUserPassword(authUserId, passwordHash) {
+  await queryDB(
+    `UPDATE auth.users SET encrypted_password = $1, email_confirmed_at = NOW(), updated_at = NOW() WHERE id = $2`,
+    [passwordHash, authUserId]
+  );
 }
 
-/* ──────────────────────────────────────────────
-   REGISTER  – creates an unverified user and
-   sends an OTP to the provided email address.
-─────────────────────────────────────────────── */
 async function register(data) {
-  const existing = await User.findOne({ where: { email: data.email } });
+  let existing = await User.findOne({ where: { email: data.email } });
   if (existing) {
-    const err = new Error('Email already exists');
-    err.status = 409;
-    throw err;
+    if (existing.supabaseUid && existing.isVerified) {
+      throw Object.assign(new Error('Email already exists'), { status: 409 });
+    }
+    existing.name = data.name;
+    existing.phone = data.phone;
+    existing.role = data.role || 'traveler';
+    existing.password = await bcrypt.hash(data.password, 10);
+    existing.active = false;
+    existing.otpCode = null;
+    existing.otpExpiry = null;
+    await existing.save();
+  } else {
+    await User.create({
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      password: await bcrypt.hash(data.password, 10),
+      role: data.role || 'traveler',
+      isVerified: false,
+      active: false,
+    });
   }
 
-  const hashedPassword = await bcrypt.hash(data.password, 10);
-  const otp = generateOtp();
+  return { message: 'OTP sent to your email', email: data.email };
+}
 
-  const user = await User.create({
-    name: data.name,
-    email: data.email,
-    password: hashedPassword,
-    phone: data.phone,
-    role: data.role || 'traveler',
-    isVerified: false,
-    active: false, // account is inactive until OTP is verified
-    otpCode: otp,
-    otpExpiry: otpExpiry(),
-  });
+async function completeRegistration(data) {
+  const { data: { user: authUser }, error } = await supabaseAdmin.auth.getUser(data.accessToken);
+  if (error || !authUser) {
+    throw Object.assign(new Error('OTP verification failed. Please try again.'), { status: 401 });
+  }
 
-  // Create role-specific records now (they remain inactive until verified)
+  const user = await User.findOne({ where: { email: data.email } });
+  if (!user) {
+    throw Object.assign(new Error('Registration not found. Please start again.'), { status: 404 });
+  }
+  if (user.isVerified && user.supabaseUid) {
+    throw Object.assign(new Error('Account already verified'), { status: 409 });
+  }
+
+  const supabaseUid = authUser.id;
+  if (user.password) {
+    try {
+      await setAuthUserPassword(supabaseUid, user.password);
+    } catch (sqlErr) {
+      console.error('Failed to set auth user password:', sqlErr.message);
+    }
+  }
+
+  user.isVerified = true;
+  user.active = true;
+  user.supabaseUid = supabaseUid;
+  user.otpCode = null;
+  user.otpExpiry = null;
+  await user.save();
+
+  sendWelcomeEmail(data.email, user.name).catch(err =>
+    console.warn('Welcome email not sent:', err.message)
+  );
+
   if (user.role === 'driver') {
-    await Driver.create({
-      userId: user.id,
-      name: data.name,
-      phone: data.phone,
-      vehicleType: data.vehicleType || null,
-      vehicleReg: data.vehicleReg || null,
-      licenseNo: data.licenseNo || null,
-      licenseDocUrl: data.licenseDocUrl || null,
-      vehicleRcUrl: data.vehicleRcUrl || null,
-      agencyId: null,
-    });
+    const existingDriver = await Driver.findOne({ where: { userId: user.id } });
+    if (!existingDriver) {
+      await Driver.create({
+        userId: user.id,
+        name: user.name,
+        phone: user.phone,
+        vehicleType: data.vehicleType || null,
+        vehicleReg: data.vehicleReg || null,
+        licenseNo: data.licenseNo || null,
+        licenseDocUrl: data.licenseDocUrl || null,
+        vehicleRcUrl: data.vehicleRcUrl || null,
+        agencyId: null,
+      });
+    }
 
     if (data.agencyId) {
       const agencyRequestService = require('./agencyRequestService');
       try {
         await agencyRequestService.sendJoinRequest(user.id, data.agencyId);
       } catch (err) {
-        console.error('Failed to auto-send join request during registration:', err.message);
+        console.error('Failed to auto-send join request:', err.message);
       }
     }
   }
 
   if (user.role === 'agency_admin') {
-    await Agency.create({
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      createdBy: user.id,
-      adminId: user.id,
+    const existingAgency = await Agency.findOne({ where: { adminId: user.id } });
+    if (!existingAgency) {
+      await Agency.create({
+        name: data.agencyName || user.name,
+        email: user.email,
+        phone: user.phone,
+        createdBy: user.id,
+        adminId: user.id,
+      });
+    }
+  }
+
+  return { message: 'Registration complete. You can now sign in.' };
+}
+
+async function getMe(userId) {
+  const user = await User.findByPk(userId);
+  if (!user) {
+    const err = new Error('User not found');
+    err.status = 404;
+    throw err;
+  }
+  return sanitizeUser(user);
+}
+
+async function setupRole(userId, data) {
+  const user = await User.findByPk(userId);
+  if (!user) {
+    const err = new Error('User not found');
+    err.status = 404;
+    throw err;
+  }
+
+  if (data.name) user.name = data.name;
+  if (data.phone) user.phone = data.phone;
+  if (data.role) user.role = data.role;
+  await user.save();
+
+  if (user.role === 'driver') {
+    const existing = await Driver.findOne({ where: { userId: user.id } });
+    if (!existing) {
+      await Driver.create({
+        userId: user.id,
+        name: user.name,
+        phone: user.phone,
+        vehicleType: data.vehicleType || null,
+        vehicleReg: data.vehicleReg || null,
+        licenseNo: data.licenseNo || null,
+        licenseDocUrl: data.licenseDocUrl || null,
+        vehicleRcUrl: data.vehicleRcUrl || null,
+        agencyId: null,
+      });
+    }
+  }
+
+  if (user.role === 'agency_admin') {
+    const existing = await Agency.findOne({ where: { adminId: user.id } });
+    if (!existing) {
+      await Agency.create({
+        name: data.agencyName || user.name,
+        email: user.email,
+        phone: user.phone,
+        createdBy: user.id,
+        adminId: user.id,
+      });
+    }
+  }
+
+  return { message: 'Profile setup complete', user: sanitizeUser(user) };
+}
+
+function sanitizeUser(user) {
+  const { password, otpCode, otpExpiry, loginAttempts, lockedUntil, ...rest } = user.toJSON();
+  return rest;
+}
+
+async function oauthSetup(data) {
+  const { data: { user: authUser }, error } = await supabaseAdmin.auth.getUser(data.accessToken);
+  if (error || !authUser) {
+    throw Object.assign(new Error('Invalid session. Please sign in again.'), { status: 401 });
+  }
+
+  const email = authUser.email;
+  if (!email) {
+    throw Object.assign(new Error('No email found from OAuth provider.'), { status: 400 });
+  }
+
+  let user = await User.findOne({ where: { email } });
+
+  if (!user) {
+    const passwordHash = data.password ? await bcrypt.hash(data.password, 10) : '';
+
+    user = await User.create({
+      name: data.name || authUser.user_metadata?.name || email.split('@')[0],
+      email,
+      phone: data.phone || authUser.user_metadata?.phone || '',
+      password: passwordHash,
+      role: data.role || 'traveler',
+      supabaseUid: authUser.id,
+      isVerified: true,
+      active: true,
     });
-  }
 
-  // Send OTP email (throws if SMTP is misconfigured so user knows)
-  await sendOtpEmail({ name: user.name, email: user.email, otp });
+    if (passwordHash) {
+      try {
+        await setAuthUserPassword(authUser.id, passwordHash);
+      } catch (sqlErr) {
+        console.error('Failed to set auth user password:', sqlErr.message);
+      }
+    }
 
-  return { message: 'OTP sent to your email. Please verify to activate your account.', email: user.email };
-}
+    if (user.role === 'driver') {
+      const existingDriver = await Driver.findOne({ where: { userId: user.id } });
+      if (!existingDriver) {
+        await Driver.create({
+          userId: user.id,
+          name: user.name,
+          phone: user.phone,
+          vehicleType: data.vehicleType || null,
+          vehicleReg: data.vehicleReg || null,
+          licenseNo: data.licenseNo || null,
+          licenseDocUrl: data.licenseDocUrl || null,
+          vehicleRcUrl: data.vehicleRcUrl || null,
+          agencyId: data.agencyId || null,
+        });
+      }
+    }
 
-/* ──────────────────────────────────────────────
-   VERIFY OTP  – activates account on success.
-─────────────────────────────────────────────── */
-async function verifyOtp(email, otp) {
-  const user = await User.findOne({ where: { email } });
-  if (!user) {
-    const err = new Error('User not found');
-    err.status = 404;
-    throw err;
-  }
+    if (user.role === 'agency_admin') {
+      const existingAgency = await Agency.findOne({ where: { adminId: user.id } });
+      if (!existingAgency) {
+        await Agency.create({
+          name: data.agencyName || user.name,
+          email: user.email,
+          phone: user.phone,
+          createdBy: user.id,
+          adminId: user.id,
+        });
+      }
+    }
 
-  if (user.isVerified) {
-    const err = new Error('Account is already verified');
-    err.status = 400;
-    throw err;
-  }
-
-  if (!user.otpCode || !user.otpExpiry) {
-    const err = new Error('No OTP found. Please request a new one.');
-    err.status = 400;
-    throw err;
-  }
-
-  if (new Date() > new Date(user.otpExpiry)) {
-    const err = new Error('OTP has expired. Please request a new one.');
-    err.status = 410;
-    throw err;
-  }
-
-  if (user.otpCode !== String(otp)) {
-    const err = new Error('Invalid OTP. Please try again.');
-    err.status = 401;
-    throw err;
-  }
-
-  // Activate the account
-  user.isVerified = true;
-  user.active = true;
-  user.otpCode = null;
-  user.otpExpiry = null;
-  await user.save();
-
-  const token = generateToken(user);
-  const { password, otpCode: _otp, otpExpiry: _exp, ...userWithoutSensitive } = user.toJSON();
-  return { token, user: userWithoutSensitive };
-}
-
-/* ──────────────────────────────────────────────
-   RESEND OTP  – regenerates and resends the OTP.
-─────────────────────────────────────────────── */
-async function resendOtp(email) {
-  const user = await User.findOne({ where: { email } });
-  if (!user) {
-    const err = new Error('User not found');
-    err.status = 404;
-    throw err;
-  }
-
-  if (user.isVerified) {
-    const err = new Error('Account is already verified');
-    err.status = 400;
-    throw err;
-  }
-
-  const otp = generateOtp();
-  user.otpCode = otp;
-  user.otpExpiry = otpExpiry();
-  await user.save();
-
-  await sendOtpEmail({ name: user.name, email: user.email, otp });
-  return { message: 'A new OTP has been sent to your email.' };
-}
-
-/* ──────────────────────────────────────────────
-   LOGIN  – only allows verified accounts.
-   Demo accounts bypass the OTP requirement.
-─────────────────────────────────────────────── */
-const DEMO_EMAILS = new Set([
-  'admin123@gmail.com',
-  'agency@example.com',
-  'driver@example.com',
-  'traveler@example.com',
-]);
-
-async function login(email, password) {
-  const user = await User.findOne({ where: { email } });
-  if (!user) {
-    const err = new Error('Invalid email or password');
-    err.status = 401;
-    throw err;
-  }
-
-  // Demo accounts skip OTP verification
-  const isDemo = DEMO_EMAILS.has(email.toLowerCase());
-
-  if (!isDemo && !user.isVerified) {
-    const err = new Error('Please verify your email before logging in.');
-    err.status = 403;
-    throw err;
-  }
-
-  if (!user.active) {
-    const err = new Error('Account deactivated. Contact administrator');
-    err.status = 403;
-    throw err;
-  }
-
-  if (user.lockedUntil && new Date(user.lockedUntil) > new Date()) {
-    const err = new Error('Account locked. Try again after 15 seconds');
-    err.status = 429;
-    throw err;
-  }
-
-  const valid = await bcrypt.compare(password, user.password);
-  if (!valid) {
-    user.loginAttempts = (user.loginAttempts || 0) + 1;
-    if (user.loginAttempts >= 5) {
-      user.lockedUntil = new Date(Date.now() + 15 * 1000);
+    sendWelcomeEmail(email, user.name).catch(err =>
+      console.warn('Welcome email not sent:', err.message)
+    );
+  } else {
+    if (data.name) user.name = data.name;
+    if (data.phone) user.phone = data.phone;
+    if (data.role) user.role = data.role;
+    user.supabaseUid = authUser.id;
+    user.isVerified = true;
+    user.active = true;
+    if (data.password) {
+      const passwordHash = await bcrypt.hash(data.password, 10);
+      user.password = passwordHash;
+      try {
+        await setAuthUserPassword(authUser.id, passwordHash);
+      } catch (sqlErr) {
+        console.error('Failed to set auth user password:', sqlErr.message);
+      }
     }
     await user.save();
-    const err = new Error('Invalid email or password');
-    err.status = 401;
-    throw err;
   }
 
-  user.loginAttempts = 0;
-  user.lockedUntil = null;
-  await user.save();
-
-  const token = generateToken(user);
-  const { password: _, otpCode: _otp, otpExpiry: _exp, ...userWithoutSensitive } = user.toJSON();
-  return { token, user: userWithoutSensitive };
+  return { message: 'Profile setup complete', user: sanitizeUser(user) };
 }
 
-module.exports = { register, verifyOtp, resendOtp, login };
+module.exports = { register, completeRegistration, getMe, setupRole, oauthSetup };

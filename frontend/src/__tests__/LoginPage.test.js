@@ -4,7 +4,28 @@ import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from '../contexts/AuthContext';
 
-jest.mock('../services/api');
+const mockSignInWithPassword = jest.fn();
+const mockGetSession = jest.fn();
+const mockOnAuthStateChange = jest.fn();
+const mockSignOut = jest.fn();
+
+jest.mock('../services/supabase', () => ({
+  __esModule: true,
+  default: {
+    auth: {
+      getSession: (...args) => mockGetSession(...args),
+      onAuthStateChange: (...args) => mockOnAuthStateChange(...args),
+      signInWithPassword: (...args) => mockSignInWithPassword(...args),
+      signOut: (...args) => mockSignOut(...args),
+    },
+  },
+}));
+
+jest.mock('../services/api', () => ({
+  __esModule: true,
+  default: { get: jest.fn(), post: jest.fn() },
+}));
+
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key, fallback) => fallback || key,
@@ -28,6 +49,8 @@ describe('LoginPage — REQ-001, REQ-002', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     localStorage.clear();
+    mockGetSession.mockResolvedValue({ data: { session: null } });
+    mockOnAuthStateChange.mockReturnValue({ data: { subscription: { unsubscribe: jest.fn() } } });
   });
 
   test('renders login form with email and password fields', () => {
@@ -38,9 +61,7 @@ describe('LoginPage — REQ-001, REQ-002', () => {
   });
 
   test('displays error on failed login', async () => {
-    api.post = jest.fn().mockRejectedValue({
-      response: { data: { message: 'Invalid credentials' } },
-    });
+    mockSignInWithPassword.mockRejectedValue(new Error('Invalid credentials'));
     const user = userEvent.setup();
     renderLoginPage();
 
@@ -58,7 +79,7 @@ describe('LoginPage — REQ-001, REQ-002', () => {
   });
 
   test('displays loading state during login', async () => {
-    api.post = jest.fn().mockImplementation(() => new Promise(() => {}));
+    mockSignInWithPassword.mockImplementation(() => new Promise(() => {}));
     const user = userEvent.setup();
     renderLoginPage();
 

@@ -20,7 +20,7 @@ module.exports = {
       },
       password: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: true,
       },
       phone: {
         type: Sequelize.STRING,
@@ -41,6 +41,23 @@ module.exports = {
       lockedUntil: {
         type: Sequelize.DATE,
         allowNull: true,
+      },
+      otpCode: {
+        type: Sequelize.STRING(6),
+        allowNull: true,
+      },
+      otpExpiry: {
+        type: Sequelize.DATE,
+        allowNull: true,
+      },
+      isVerified: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+      },
+      supabaseUid: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        unique: true,
       },
       createdAt: {
         type: Sequelize.DATE,

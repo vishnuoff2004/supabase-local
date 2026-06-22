@@ -1,7 +1,13 @@
 const multer = require('multer');
 const path = require('path');
 const crypto = require('crypto');
+const fs = require('fs');
 const { minioClient, BUCKET_NAME } = require('../config/minio');
+
+const UPLOAD_DIR = path.join(__dirname, '../../uploads');
+if (!fs.existsSync(UPLOAD_DIR)) {
+  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+}
 
 const storage = multer.memoryStorage();
 
@@ -18,11 +24,20 @@ const fileFilter = (req, file, cb) => {
 const multerUpload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 4 * 1024 * 1024 }, // 4 MB limit
+  limits: { fileSize: 4 * 1024 * 1024 },
 }).fields([
   { name: 'licenseDoc', maxCount: 1 },
   { name: 'vehicleRc', maxCount: 1 },
 ]);
+
+function saveToLocal(file, subDir) {
+  const dir = path.join(UPLOAD_DIR, subDir);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  const ext = path.extname(file.originalname).toLowerCase();
+  const filename = `${Date.now()}-${crypto.randomBytes(8).toString('hex')}${ext}`;
+  fs.writeFileSync(path.join(dir, filename), file.buffer);
+  return `/uploads/${subDir}/${filename}`;
+}
 
 const handleUploads = (req, res, next) => {
   multerUpload(req, res, async (err) => {
@@ -34,13 +49,11 @@ const handleUploads = (req, res, next) => {
       return res.status(400).json({ message: errMsg });
     }
 
-    // If it's a driver registration, files are mandatory
     if (req.body.role === 'driver') {
       if (!req.files || !req.files.licenseDoc || !req.files.vehicleRc) {
         return res.status(400).json({ message: 'Both Driving License and Vehicle RC documents are required.' });
       }
     } else {
-      // Non-driver role: proceed without document upload
       return next();
     }
 
@@ -48,10 +61,9 @@ const handleUploads = (req, res, next) => {
       const licenseFile = req.files.licenseDoc[0];
       const rcFile = req.files.vehicleRc[0];
 
-      // Validate extensions for extra security
+      const allowedExts = ['.jpg', '.jpeg', '.png', '.pdf'];
       const licenseExt = path.extname(licenseFile.originalname).toLowerCase();
       const rcExt = path.extname(rcFile.originalname).toLowerCase();
-      const allowedExts = ['.jpg', '.jpeg', '.png', '.pdf'];
 
       if (!allowedExts.includes(licenseExt) || !allowedExts.includes(rcExt)) {
         return res.status(400).json({ message: 'Invalid file extension. Only JPG, JPEG, PNG, and PDF are allowed.' });
@@ -63,7 +75,6 @@ const handleUploads = (req, res, next) => {
       const licenseFilename = `driver-license/${timestamp}-${uniqueId}${licenseExt}`;
       const rcFilename = `rc/${timestamp}-${uniqueId}${rcExt}`;
 
-      // Upload licenseDoc to MinIO
       await minioClient.putObject(
         BUCKET_NAME,
         licenseFilename,
@@ -72,7 +83,6 @@ const handleUploads = (req, res, next) => {
         { 'Content-Type': licenseFile.mimetype }
       );
 
-      // Upload vehicleRc to MinIO
       await minioClient.putObject(
         BUCKET_NAME,
         rcFilename,
@@ -81,15 +91,21 @@ const handleUploads = (req, res, next) => {
         { 'Content-Type': rcFile.mimetype }
       );
 
-      // Use relative paths so images work from any host (localhost, tunnel, etc.)
       req.licenseDocUrl = `/api/images/${licenseFilename}`;
       req.vehicleRcUrl = `/api/images/${rcFilename}`;
-
-      next();
     } catch (uploadError) {
-      console.error('MinIO Upload Error:', uploadError);
-      return res.status(500).json({ message: 'Failed to upload documents to storage.' });
+      console.warn('MinIO upload failed, falling back to local disk:', uploadError.message);
+      try {
+        req.licenseDocUrl = saveToLocal(req.files.licenseDoc[0], 'driver-license');
+        req.vehicleRcUrl = saveToLocal(req.files.vehicleRc[0], 'rc');
+        console.log('Files saved to local disk as fallback');
+      } catch (localError) {
+        console.error('Local upload also failed:', localError);
+        return res.status(500).json({ message: 'Failed to upload documents.' });
+      }
     }
+
+    next();
   });
 };
 

@@ -80,6 +80,8 @@ app.get('/api/images/*', async (req, res) => {
   }
 });
 
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
 const frontendBuild = path.join(__dirname, '../../frontend/build');
 
 app.use(express.static(frontendBuild, {
