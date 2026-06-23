@@ -10,8 +10,6 @@ AS $$
 BEGIN
   INSERT INTO public."Users" (
     name,
-    email,
-    password,
     phone,
     role,
     active,
@@ -24,23 +22,20 @@ BEGIN
     "createdAt",
     "updatedAt"
   ) VALUES (
-    COALESCE(NEW.raw_user_meta_data->>'name', NEW.email),
-    NEW.email,
+    COALESCE(NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1)),
     '',
-    COALESCE(NEW.raw_user_meta_data->>'phone', ''),
-    COALESCE(NEW.raw_user_meta_data->>'role', 'traveler')::"enum_Users_role",
+    'traveler',
     true,
     0,
     NULL,
     NULL,
     NULL,
-    true,
+    false,
     NEW.id,
     NOW(),
     NOW()
   )
-  ON CONFLICT (email) DO UPDATE SET
-    "supabaseUid" = EXCLUDED."supabaseUid",
+  ON CONFLICT ("supabaseUid") DO UPDATE SET
     "updatedAt" = NOW();
   RETURN NEW;
 END;

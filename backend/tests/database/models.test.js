@@ -47,10 +47,10 @@ describe('REQ-031, REQ-033 — Database Structure (TEST-104, TEST-107, TEST-108)
     expect(db.Sequelize).toBeDefined();
   });
 
-  test('User model should have email unique constraint and role enum', () => {
+  test('User model should have email virtual field and role enum', () => {
     const db = require(path.join(modelsDir, 'index.js'));
     const User = db.User;
-    expect(User.rawAttributes.email.unique).toBe(true);
+    expect(User.rawAttributes.email.type.key).toBe('VIRTUAL');
     expect(User.rawAttributes.role.type.values).toContain('traveler');
     expect(User.rawAttributes.role.type.values).toContain('admin');
   });

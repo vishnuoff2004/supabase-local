@@ -1,10 +1,13 @@
-const { User, Agency, Driver, Booking, Route, BookingStatusHistory, Sequelize } = require('../models');
+const { User, Agency, Driver, Booking, Route, BookingStatusHistory, AuthUser, Sequelize } = require('../models');
 const { Op } = Sequelize;
 const { getAlgoliaClient, INDEX_USERS, INDEX_AGENCIES, INDEX_BOOKINGS } = require('../config/algolia');
 
 async function getUsers(page, limit, search) {
   if (page === undefined && limit === undefined && !search) {
-    return User.findAll({ attributes: { exclude: ['password'] } });
+    return User.findAll({
+      attributes: { exclude: ['password'] },
+      include: [{ model: AuthUser, as: 'authUser' }]
+    });
   }
 
   const pageNum = parseInt(page, 10) || 1;
@@ -33,6 +36,7 @@ async function getUsers(page, limit, search) {
       const users = await User.findAll({
         where: { id: { [Op.in]: userIds } },
         attributes: { exclude: ['password'] },
+        include: [{ model: AuthUser, as: 'authUser' }]
       });
 
       // Preserve ranking order
@@ -56,7 +60,7 @@ async function getUsers(page, limit, search) {
   if (search) {
     where[Op.or] = [
       { name: { [Op.like]: `%${search}%` } },
-      { email: { [Op.like]: `%${search}%` } },
+      { '$authUser.email$': { [Op.like]: `%${search}%` } },
       { phone: { [Op.like]: `%${search}%` } },
       { role: { [Op.like]: `%${search}%` } },
     ];
@@ -65,6 +69,7 @@ async function getUsers(page, limit, search) {
   const { rows, count } = await User.findAndCountAll({
     where,
     attributes: { exclude: ['password'] },
+    include: [{ model: AuthUser, as: 'authUser' }],
     limit: limitNum,
     offset,
   });
@@ -266,7 +271,11 @@ async function getAllBookings(page, limit, search) {
       attributes: ['name', 'phone', 'vehicleType', 'vehicleReg', 'licenseNo'],
       include: [{ model: Agency, attributes: ['name', 'phone', 'email'] }],
     },
-    { model: User, attributes: ['name', 'email', 'phone'] },
+    {
+      model: User,
+      attributes: ['name', 'phone'],
+      include: [{ model: AuthUser, as: 'authUser' }],
+    },
   ];
 
   if (page === undefined && limit === undefined && !search) {
@@ -328,7 +337,7 @@ async function getAllBookings(page, limit, search) {
       { id: { [Op.like]: `%${search}%` } },
       { status: { [Op.like]: `%${search}%` } },
       { '$User.name$': { [Op.like]: `%${search}%` } },
-      { '$User.email$': { [Op.like]: `%${search}%` } },
+      { '$User.authUser.email$': { [Op.like]: `%${search}%` } },
       { '$User.phone$': { [Op.like]: `%${search}%` } },
       { '$Route.source$': { [Op.like]: `%${search}%` } },
       { '$Route.destination$': { [Op.like]: `%${search}%` } },

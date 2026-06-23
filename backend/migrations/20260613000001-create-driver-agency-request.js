@@ -2,6 +2,12 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
+    const tableInfo = await queryInterface.sequelize.query(
+      `SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'DriverAgencyRequests')`,
+      { type: Sequelize.QueryTypes.SELECT }
+    );
+    if (tableInfo[0].exists) return;
+
     await queryInterface.createTable('DriverAgencyRequests', {
       id: {
         type: Sequelize.INTEGER,

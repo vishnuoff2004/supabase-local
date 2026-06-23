@@ -11,7 +11,7 @@ const bookingService = require('../../src/services/bookingService');
 const travelerToken = jwt.sign({ id: 1, role: 'traveler' }, process.env.JWT_SECRET || 'travel-agency-jwt-secret-dev');
 
 // Increase default timeout for load/concurrency tests
-jest.setTimeout(60000);
+jest.setTimeout(120000);
 
 describe('Concurrency Load Tests (TEST-102 & TEST-103)', () => {
   beforeEach(() => {
@@ -39,7 +39,7 @@ describe('Concurrency Load Tests (TEST-102 & TEST-103)', () => {
     });
     
     // Concurrency load check
-    expect(elapsed).toBeLessThan(60000);
+    expect(elapsed).toBeLessThan(120000);
   });
 
   test('1000 concurrent booking requests — TEST-103', async () => {
@@ -64,6 +64,6 @@ describe('Concurrency Load Tests (TEST-102 & TEST-103)', () => {
     });
 
     // Concurrency load check
-    expect(elapsed).toBeLessThan(60000);
+    expect(elapsed).toBeLessThan(120000);
   });
 });

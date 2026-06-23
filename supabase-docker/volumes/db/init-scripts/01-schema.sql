@@ -43,8 +43,6 @@ CREATE TYPE public.enum_notifications_type AS ENUM (
 CREATE TABLE IF NOT EXISTS public."Users" (
     id integer NOT NULL,
     name character varying(255) NOT NULL,
-    email character varying(255) NOT NULL,
-    password character varying(255),
     phone character varying(255) NOT NULL,
     role public."enum_Users_role" DEFAULT 'traveler',
     active boolean DEFAULT true,
@@ -238,7 +236,6 @@ ALTER TABLE ONLY public."SequelizeMeta" ADD CONSTRAINT "SequelizeMeta_pkey" PRIM
 ALTER TABLE ONLY public."Agencies" ADD CONSTRAINT "Agencies_email_key" UNIQUE (email);
 ALTER TABLE ONLY public."Drivers" ADD CONSTRAINT "Drivers_userId_key" UNIQUE ("userId");
 ALTER TABLE ONLY public."Drivers" ADD CONSTRAINT "Drivers_vehicleReg_key" UNIQUE ("vehicleReg");
-ALTER TABLE ONLY public."Users" ADD CONSTRAINT "Users_email_key" UNIQUE (email);
 ALTER TABLE ONLY public."Users" ADD CONSTRAINT "Users_supabaseUid_key" UNIQUE ("supabaseUid");
 
 -- FOREIGN KEYS

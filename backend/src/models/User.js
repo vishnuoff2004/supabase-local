@@ -6,6 +6,7 @@ module.exports = (sequelize, DataTypes) => {
       User.hasOne(models.Driver, { foreignKey: 'userId' });
       User.hasMany(models.Booking, { foreignKey: 'userId' });
       User.hasOne(models.Agency, { foreignKey: 'adminId', as: 'managedAgency' });
+      User.belongsTo(models.AuthUser, { foreignKey: 'supabaseUid', as: 'authUser' });
     }
   }
 
@@ -13,8 +14,12 @@ module.exports = (sequelize, DataTypes) => {
     {
       id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
       name: { type: DataTypes.STRING, allowNull: false },
-      email: { type: DataTypes.STRING, allowNull: false, unique: true },
-      password: { type: DataTypes.STRING, allowNull: true },
+      email: {
+        type: DataTypes.VIRTUAL,
+        get() {
+          return this.authUser ? this.authUser.email : null;
+        }
+      },
       phone: { type: DataTypes.STRING, allowNull: false },
       role: {
         type: DataTypes.ENUM('traveler', 'driver', 'agency_admin', 'admin'),

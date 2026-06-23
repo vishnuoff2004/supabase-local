@@ -46,7 +46,10 @@ async function getRouteIndexObject(routeId) {
 }
 
 async function getUserIndexObject(userId) {
-  const user = await User.findByPk(userId);
+  const { AuthUser } = require('../models');
+  const user = await User.findByPk(userId, {
+    include: [{ model: AuthUser, as: 'authUser' }]
+  });
   if (!user) return null;
   return {
     objectID: user.id.toString(),
@@ -79,6 +82,7 @@ async function getAgencyIndexObject(agencyId) {
 }
 
 async function getBookingIndexObject(bookingId) {
+  const { AuthUser } = require('../models');
   const booking = await Booking.findByPk(bookingId, {
     include: [
       {
@@ -90,7 +94,11 @@ async function getBookingIndexObject(bookingId) {
         attributes: ['name', 'phone', 'vehicleType', 'vehicleReg', 'licenseNo'],
         include: [{ model: Agency, attributes: ['name', 'phone', 'email'] }],
       },
-      { model: User, attributes: ['name', 'email', 'phone'] },
+      {
+        model: User,
+        attributes: ['name', 'phone'],
+        include: [{ model: AuthUser, as: 'authUser' }],
+      },
     ],
   });
 

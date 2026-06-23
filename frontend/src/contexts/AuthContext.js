@@ -137,6 +137,22 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
+  const refreshUser = useCallback(async () => {
+    const activeToken = session?.access_token || localStorage.getItem('supabase_token');
+    if (activeToken) {
+      try {
+        const res = await api.get('/auth/me', {
+          headers: { Authorization: `Bearer ${activeToken}` }
+        });
+        setUser(res.data);
+        return res.data;
+      } catch (err) {
+        setUser(null);
+        throw err;
+      }
+    }
+  }, [session]);
+
   const logout = useCallback(async () => {
     await supabase.auth.signOut();
     localStorage.removeItem('supabase_token');
@@ -150,6 +166,7 @@ export function AuthProvider({ children }) {
     <AuthContext.Provider value={{
       user, session, token, loading, error,
       login, loginWithGoogle, register, setupRole, completeOAuthSetup, logout,
+      fetchUser: refreshUser,
     }}>
       {children}
     </AuthContext.Provider>

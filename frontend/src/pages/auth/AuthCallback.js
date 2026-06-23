@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import supabase from '../../services/supabase';
 import api from '../../services/api';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import OtpModal from '../../components/auth/OtpModal';
+import { useAuth } from '../../contexts/AuthContext';
 
 const roleRoutes = {
   admin: '/admin/dashboard',
@@ -13,8 +15,11 @@ const roleRoutes = {
 
 function AuthCallback() {
   const navigate = useNavigate();
+  const { fetchUser, logout } = useAuth();
   const [error, setError] = useState('');
   const [errorType, setErrorType] = useState('');
+  const [showOtp, setShowOtp] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState('');
   const handledRef = useRef(false);
   const cancelledRef = useRef(false);
 
@@ -56,23 +61,87 @@ function AuthCallback() {
 
         localStorage.setItem('supabase_token', session.access_token);
 
-        const res = await api.get('/auth/me');
-        const userData = res.data;
-        const role = userData?.role;
-        if (!role || (role === 'traveler' && !userData?.phone)) {
-          navigate('/auth/complete-profile', { replace: true });
+        let oauthSetupData = {};
+        const stored = sessionStorage.getItem('google_reg_data');
+        if (stored) {
+          try {
+            oauthSetupData = JSON.parse(stored);
+          } catch (e) {
+            console.error('Failed to parse google_reg_data:', e);
+          }
+        }
+
+        try {
+          await api.post('/auth/oauth-setup', oauthSetupData);
+        } catch (_) {
+          /* user may already exist — ignore */
+        }
+
+        sessionStorage.removeItem('google_reg_data');
+
+        const dbUser = await fetchUser();
+        if (!dbUser) {
+          throw new Error('User profile could not be loaded.');
+        }
+
+        if (!dbUser.isVerified) {
+          setPendingEmail(dbUser.email);
+          setShowOtp(true);
         } else {
-          navigate(roleRoutes[role] || '/search', { replace: true });
+          if (!dbUser.phone) {
+            navigate('/auth/complete-profile', { replace: true });
+          } else {
+            navigate(roleRoutes[dbUser.role] || '/search', { replace: true });
+          }
         }
       } catch (err) {
-        navigate('/auth/complete-profile', { replace: true });
+        console.error('OAuth Callback Error:', err);
+        setError(err.response?.data?.message || err.message || 'Authentication failed. Please try again.');
       }
     }
 
     handleCallback();
 
     return () => { cancelledRef.current = true; };
-  }, [navigate]);
+  }, [navigate, fetchUser]);
+
+  const handleOtpComplete = async () => {
+    setShowOtp(false);
+    try {
+      const dbUser = await fetchUser();
+      if (!dbUser.phone) {
+        navigate('/auth/complete-profile', { replace: true });
+      } else {
+        navigate(roleRoutes[dbUser.role] || '/search', { replace: true });
+      }
+    } catch (err) {
+      setError(err.message || 'Verification succeeded, but profile fetch failed.');
+    }
+  };
+
+  const handleOtpError = (msg) => {
+    setError(msg);
+  };
+
+  const handleOtpCancel = async () => {
+    try {
+      await logout();
+      navigate('/login', { replace: true });
+    } catch (err) {
+      setError(err.message || 'Logout failed.');
+    }
+  };
+
+  if (showOtp) {
+    return (
+      <OtpModal
+        email={pendingEmail}
+        onComplete={handleOtpComplete}
+        onError={handleOtpError}
+        onCancel={handleOtpCancel}
+      />
+    );
+  }
 
   if (error) {
     return (

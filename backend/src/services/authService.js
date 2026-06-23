@@ -6,9 +6,13 @@ const { User, Driver, Agency } = require('../models');
 const { sendWelcomeEmail } = require('./emailService');
 
 async function queryDB(text, params) {
+  const isLocal = process.env.DATABASE_URL?.includes('127.0.0.1') || process.env.DATABASE_URL?.includes('localhost');
+  const dbSsl = process.env.DB_SSL === 'true';
+  const ssl = dbSsl || (process.env.DATABASE_URL && !isLocal) ? { rejectUnauthorized: false } : false;
+
   const client = new Client({
     connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false },
+    ssl: ssl,
   });
   await client.connect();
   try {
@@ -18,6 +22,7 @@ async function queryDB(text, params) {
   }
 }
 
+
 async function setAuthUserPassword(authUserId, passwordHash) {
   await queryDB(
     `UPDATE auth.users SET encrypted_password = $1, email_confirmed_at = NOW(), updated_at = NOW() WHERE id = $2`,
@@ -26,65 +31,87 @@ async function setAuthUserPassword(authUserId, passwordHash) {
 }
 
 async function register(data) {
-  let existing = await User.findOne({ where: { email: data.email } });
-  if (existing) {
-    if (existing.supabaseUid && existing.isVerified) {
+  const { AuthUser } = require('../models');
+  const authUser = await AuthUser.findOne({ where: { email: data.email } });
+  if (authUser) {
+    const existing = await User.findOne({ where: { supabaseUid: authUser.id } });
+    if (existing && existing.isVerified) {
       throw Object.assign(new Error('Email already exists'), { status: 409 });
     }
-    existing.name = data.name;
-    existing.phone = data.phone;
-    existing.role = data.role || 'traveler';
-    existing.password = await bcrypt.hash(data.password, 10);
-    existing.active = false;
-    existing.otpCode = null;
-    existing.otpExpiry = null;
-    await existing.save();
-  } else {
-    await User.create({
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      password: await bcrypt.hash(data.password, 10),
-      role: data.role || 'traveler',
-      isVerified: false,
-      active: false,
-    });
   }
 
-  return { message: 'OTP sent to your email', email: data.email };
+  return {
+    message: 'OTP sent to your email',
+    email: data.email,
+    licenseDocUrl: data.licenseDocUrl || null,
+    vehicleRcUrl: data.vehicleRcUrl || null,
+  };
 }
 
 async function completeRegistration(data) {
-  const { data: { user: authUser }, error } = await supabaseAdmin.auth.getUser(data.accessToken);
+  let authUser;
+  let error;
+  for (let i = 0; i < 3; i++) {
+    try {
+      const res = await supabaseAdmin.auth.getUser(data.accessToken);
+      authUser = res.data?.user;
+      error = res.error;
+      if (authUser && !error) break;
+    } catch (err) {
+      error = err;
+    }
+    console.warn(`getUser in completeRegistration attempt ${i + 1} failed, retrying in 2s...`);
+    await new Promise(resolve => setTimeout(resolve, 2000));
+  }
+
   if (error || !authUser) {
     throw Object.assign(new Error('OTP verification failed. Please try again.'), { status: 401 });
   }
 
-  const user = await User.findOne({ where: { email: data.email } });
-  if (!user) {
-    throw Object.assign(new Error('Registration not found. Please start again.'), { status: 404 });
-  }
-  if (user.isVerified && user.supabaseUid) {
+  const supabaseUid = authUser.id;
+  let user = await User.findOne({
+    where: { supabaseUid },
+    include: [{ model: require('../models').AuthUser, as: 'authUser' }]
+  });
+
+  if (user && user.isVerified) {
     throw Object.assign(new Error('Account already verified'), { status: 409 });
   }
 
-  const supabaseUid = authUser.id;
-  if (user.password) {
+  if (data.password) {
+    const passwordHash = await bcrypt.hash(data.password, 10);
     try {
-      await setAuthUserPassword(supabaseUid, user.password);
+      await setAuthUserPassword(supabaseUid, passwordHash);
     } catch (sqlErr) {
       console.error('Failed to set auth user password:', sqlErr.message);
+      throw Object.assign(new Error('Failed to set auth user password. Please check backend logs or database connection.'), { status: 500 });
     }
   }
 
-  user.isVerified = true;
-  user.active = true;
-  user.supabaseUid = supabaseUid;
-  user.otpCode = null;
-  user.otpExpiry = null;
-  await user.save();
+  if (!user) {
+    user = await User.create({
+      name: data.name,
+      phone: data.phone,
+      role: data.role || 'traveler',
+      isVerified: true,
+      active: true,
+      supabaseUid: supabaseUid,
+    });
+  } else {
+    user.name = data.name;
+    user.phone = data.phone;
+    user.role = data.role || 'traveler';
+    user.isVerified = true;
+    user.active = true;
+    await user.save();
+  }
 
-  sendWelcomeEmail(data.email, user.name).catch(err =>
+  // Refetch user with authUser included to make sure email is available for email services
+  user = await User.findByPk(user.id, {
+    include: [{ model: require('../models').AuthUser, as: 'authUser' }]
+  });
+
+  sendWelcomeEmail(authUser.email || data.email, user.name).catch(err =>
     console.warn('Welcome email not sent:', err.message)
   );
 
@@ -119,7 +146,7 @@ async function completeRegistration(data) {
     if (!existingAgency) {
       await Agency.create({
         name: data.agencyName || user.name,
-        email: user.email,
+        email: authUser.email || data.email,
         phone: user.phone,
         createdBy: user.id,
         adminId: user.id,
@@ -131,7 +158,10 @@ async function completeRegistration(data) {
 }
 
 async function getMe(userId) {
-  const user = await User.findByPk(userId);
+  const { AuthUser } = require('../models');
+  const user = await User.findByPk(userId, {
+    include: [{ model: AuthUser, as: 'authUser' }]
+  });
   if (!user) {
     const err = new Error('User not found');
     err.status = 404;
@@ -141,7 +171,10 @@ async function getMe(userId) {
 }
 
 async function setupRole(userId, data) {
-  const user = await User.findByPk(userId);
+  const { AuthUser } = require('../models');
+  const user = await User.findByPk(userId, {
+    include: [{ model: AuthUser, as: 'authUser' }]
+  });
   if (!user) {
     const err = new Error('User not found');
     err.status = 404;
@@ -187,12 +220,26 @@ async function setupRole(userId, data) {
 }
 
 function sanitizeUser(user) {
-  const { password, otpCode, otpExpiry, loginAttempts, lockedUntil, ...rest } = user.toJSON();
+  const { password, otpCode, otpExpiry, loginAttempts, lockedUntil, authUser, ...rest } = user.toJSON();
   return rest;
 }
 
 async function oauthSetup(data) {
-  const { data: { user: authUser }, error } = await supabaseAdmin.auth.getUser(data.accessToken);
+  let authUser;
+  let error;
+  for (let i = 0; i < 3; i++) {
+    try {
+      const res = await supabaseAdmin.auth.getUser(data.accessToken);
+      authUser = res.data?.user;
+      error = res.error;
+      if (authUser && !error) break;
+    } catch (err) {
+      error = err;
+    }
+    console.warn(`getUser in oauthSetup attempt ${i + 1} failed, retrying in 2s...`);
+    await new Promise(resolve => setTimeout(resolve, 2000));
+  }
+
   if (error || !authUser) {
     throw Object.assign(new Error('Invalid session. Please sign in again.'), { status: 401 });
   }
@@ -202,16 +249,18 @@ async function oauthSetup(data) {
     throw Object.assign(new Error('No email found from OAuth provider.'), { status: 400 });
   }
 
-  let user = await User.findOne({ where: { email } });
+  const { AuthUser } = require('../models');
+  let user = await User.findOne({
+    where: { supabaseUid: authUser.id },
+    include: [{ model: AuthUser, as: 'authUser' }]
+  });
 
   if (!user) {
     const passwordHash = data.password ? await bcrypt.hash(data.password, 10) : '';
 
     user = await User.create({
       name: data.name || authUser.user_metadata?.name || email.split('@')[0],
-      email,
       phone: data.phone || authUser.user_metadata?.phone || '',
-      password: passwordHash,
       role: data.role || 'traveler',
       supabaseUid: authUser.id,
       isVerified: true,
@@ -223,8 +272,14 @@ async function oauthSetup(data) {
         await setAuthUserPassword(authUser.id, passwordHash);
       } catch (sqlErr) {
         console.error('Failed to set auth user password:', sqlErr.message);
+        throw Object.assign(new Error('Failed to set auth user password. Please check backend logs or database connection.'), { status: 500 });
       }
     }
+
+    // Refetch with authUser association included
+    user = await User.findByPk(user.id, {
+      include: [{ model: AuthUser, as: 'authUser' }]
+    });
 
     if (user.role === 'driver') {
       const existingDriver = await Driver.findOne({ where: { userId: user.id } });
@@ -268,17 +323,47 @@ async function oauthSetup(data) {
     user.active = true;
     if (data.password) {
       const passwordHash = await bcrypt.hash(data.password, 10);
-      user.password = passwordHash;
       try {
         await setAuthUserPassword(authUser.id, passwordHash);
       } catch (sqlErr) {
         console.error('Failed to set auth user password:', sqlErr.message);
+        throw Object.assign(new Error('Failed to set auth user password. Please check backend logs or database connection.'), { status: 500 });
       }
     }
     await user.save();
+    
+    // Refetch to get current email
+    user = await User.findByPk(user.id, {
+      include: [{ model: AuthUser, as: 'authUser' }]
+    });
   }
 
   return { message: 'Profile setup complete', user: sanitizeUser(user) };
 }
 
-module.exports = { register, completeRegistration, getMe, setupRole, oauthSetup };
+async function login(email, password) {
+  const { data, error } = await supabaseAdmin.auth.signInWithPassword({ email, password });
+  if (error || !data?.user) {
+    throw Object.assign(new Error('Invalid email or password'), { status: 401 });
+  }
+
+  const { AuthUser } = require('../models');
+  const dbUser = await User.findOne({
+    where: { supabaseUid: data.user.id },
+    include: [{ model: AuthUser, as: 'authUser' }],
+  });
+
+  if (!dbUser) {
+    throw Object.assign(new Error('User profile not found'), { status: 404 });
+  }
+  if (!dbUser.active) {
+    throw Object.assign(new Error('Account deactivated. Contact administrator'), { status: 403 });
+  }
+
+  return {
+    token: data.session.access_token,
+    user: sanitizeUser(dbUser),
+  };
+}
+
+module.exports = { register, login, completeRegistration, getMe, setupRole, oauthSetup };

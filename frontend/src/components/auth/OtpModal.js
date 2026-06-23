@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import supabase from '../../services/supabase';
 import api from '../../services/api';
 
-function OtpModal({ email, onComplete, onError }) {
+function OtpModal({ email, onComplete, onError, onCancel }) {
   const [otp, setOtp] = useState(Array(6).fill(''));
   const [loading, setLoading] = useState(false);
   const [sendingStatus, setSendingStatus] = useState('idle');
@@ -99,11 +99,20 @@ function OtpModal({ email, onComplete, onError }) {
         return;
       }
 
-      await api.post('/auth/complete-registration', {
-        email,
-        accessToken,
-      });
+      let payload = { email, accessToken };
+      const stored = sessionStorage.getItem('pending_reg_data');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          payload = { ...payload, ...parsed };
+        } catch (e) {
+          console.error('Failed to parse pending_reg_data:', e);
+        }
+      }
 
+      await api.post('/auth/complete-registration', payload);
+
+      sessionStorage.removeItem('pending_reg_data');
       onComplete?.();
     } catch (err) {
       onError?.(err.response?.data?.message || err.message || 'Verification failed');
@@ -210,6 +219,19 @@ function OtpModal({ email, onComplete, onError }) {
             </button>
           )}
         </div>
+        {onCancel && (
+          <div style={{ marginTop: 16 }}>
+            <button
+              onClick={onCancel}
+              style={{
+                background: 'none', border: 'none', color: 'var(--color-text-muted)',
+                cursor: 'pointer', fontSize: '0.85rem', textDecoration: 'underline',
+              }}
+            >
+              Cancel & Sign Out
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

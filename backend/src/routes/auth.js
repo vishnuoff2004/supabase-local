@@ -6,6 +6,7 @@ const { handleUploads } = require('../middleware/upload');
 const router = Router();
 
 router.post('/register', handleUploads, authController.register);
+router.post('/login', authController.login);
 router.post('/complete-registration', authController.completeRegistration);
 router.post('/oauth-setup', authController.oauthSetup);
 router.get('/me', authenticate, authController.getMe);

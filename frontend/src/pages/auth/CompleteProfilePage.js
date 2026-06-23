@@ -49,14 +49,10 @@ function CompleteProfilePage() {
     setError('');
     setLoading(true);
     try {
-      try {
+      if (user) {
         await setupRole(form);
-      } catch (setupErr) {
-        if (setupErr.response?.status === 403) {
-          await completeOAuthSetup(form);
-        } else {
-          throw setupErr;
-        }
+      } else {
+        await completeOAuthSetup(form);
       }
       sessionStorage.removeItem('google_reg_data');
       const route = roleRoutes[form.role] || '/search';

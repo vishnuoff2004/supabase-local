@@ -16,6 +16,7 @@ sequelize
 
 const db = {};
 
+db.AuthUser = require('./AuthUser')(sequelize, Sequelize.DataTypes);
 db.User = require('./User')(sequelize, Sequelize.DataTypes);
 db.Agency = require('./Agency')(sequelize, Sequelize.DataTypes);
 db.Driver = require('./Driver')(sequelize, Sequelize.DataTypes);

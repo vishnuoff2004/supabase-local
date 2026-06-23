@@ -3,6 +3,7 @@ import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import Button from '../../components/common/Button';
+import OtpModal from '../../components/auth/OtpModal';
 
 const roleRoutes = {
   admin: '/admin/dashboard',
@@ -25,7 +26,9 @@ function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const { login, loginWithGoogle } = useAuth();
+  const [showOtp, setShowOtp] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState('');
+  const { user, login, loginWithGoogle, logout, fetchUser } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -41,12 +44,24 @@ function LoginPage() {
     }
   }, [searchParams, t]);
 
+  React.useEffect(() => {
+    if (user && !user.isVerified) {
+      setPendingEmail(user.email);
+      setShowOtp(true);
+    }
+  }, [user]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
       const data = await login(email, password);
+      if (data && !data.isVerified) {
+        setPendingEmail(email);
+        setShowOtp(true);
+        return;
+      }
       const role = data?.role || 'traveler';
       const route = roleRoutes[role] || '/search';
       navigate(route);
@@ -68,7 +83,32 @@ function LoginPage() {
     }
   };
 
+  const handleOtpComplete = async () => {
+    setShowOtp(false);
+    try {
+      const dbUser = await fetchUser();
+      if (!dbUser.phone) {
+        navigate('/auth/complete-profile', { replace: true });
+      } else {
+        const route = roleRoutes[dbUser.role] || '/search';
+        navigate(route);
+      }
+    } catch (err) {
+      setError(err.message || 'Verification succeeded, but profile fetch failed.');
+    }
+  };
+
+  const handleOtpCancel = async () => {
+    setShowOtp(false);
+    await logout();
+  };
+
+  const handleOtpError = (msg) => {
+    setError(msg);
+  };
+
   return (
+    <>
     <div className="auth-page">
       <div className="auth-card animate-scale-in-on-load">
         <div className="auth-logo">
@@ -168,6 +208,15 @@ function LoginPage() {
         </div>
       </div>
     </div>
+    {showOtp && (
+      <OtpModal
+        email={pendingEmail}
+        onComplete={handleOtpComplete}
+        onError={handleOtpError}
+        onCancel={handleOtpCancel}
+      />
+    )}
+    </>
   );
 }
 

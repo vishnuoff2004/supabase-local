@@ -13,7 +13,7 @@ describe('Phase 2 Database — Notification Model', () => {
 
   test('Notification model has expected fields', () => {
     const Sequelize = require('sequelize');
-    const sequelize = new Sequelize({ dialect: 'mysql', logging: false });
+    const sequelize = new Sequelize({ dialect: 'postgres', logging: false });
     const Notification = require('../../src/models/Notification')(sequelize, Sequelize.DataTypes);
     expect(Notification.rawAttributes).toHaveProperty('id');
     expect(Notification.rawAttributes).toHaveProperty('userId');
@@ -26,7 +26,7 @@ describe('Phase 2 Database — Notification Model', () => {
 
   test('Notification type field is ENUM with info/booking/alert', () => {
     const Sequelize = require('sequelize');
-    const sequelize = new Sequelize({ dialect: 'mysql', logging: false });
+    const sequelize = new Sequelize({ dialect: 'postgres', logging: false });
     const Notification = require('../../src/models/Notification')(sequelize, Sequelize.DataTypes);
     const typeAttr = Notification.rawAttributes.type;
     expect(typeAttr.type).toBeInstanceOf(Sequelize.ENUM);
@@ -35,14 +35,14 @@ describe('Phase 2 Database — Notification Model', () => {
 
   test('Notification model has tableName notifications', () => {
     const Sequelize = require('sequelize');
-    const sequelize = new Sequelize({ dialect: 'mysql', logging: false });
+    const sequelize = new Sequelize({ dialect: 'postgres', logging: false });
     const Notification = require('../../src/models/Notification')(sequelize, Sequelize.DataTypes);
     expect(Notification.tableName).toBe('notifications');
   });
 
   test('Notification model has associate method', () => {
     const Sequelize = require('sequelize');
-    const sequelize = new Sequelize({ dialect: 'mysql', logging: false });
+    const sequelize = new Sequelize({ dialect: 'postgres', logging: false });
     const Notification = require('../../src/models/Notification')(sequelize, Sequelize.DataTypes);
     expect(Notification.associate).toBeDefined();
     expect(typeof Notification.associate).toBe('function');

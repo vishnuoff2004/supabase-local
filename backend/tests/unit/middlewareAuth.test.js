@@ -28,7 +28,7 @@ describe('authenticate middleware', () => {
     authenticate(mockReq, mockRes, mockNext);
 
     expect(verifyToken).toHaveBeenCalledWith('valid-token');
-    expect(mockReq.user).toEqual({ id: 1, role: 'traveler' });
+    expect(mockReq.user).toMatchObject({ id: 1, role: 'traveler' });
     expect(mockNext).toHaveBeenCalled();
   });
 
@@ -87,7 +87,7 @@ describe('optionalAuthenticate middleware', () => {
 
     optionalAuthenticate(mockReq, mockRes, mockNext);
 
-    expect(mockReq.user).toEqual({ id: 1, role: 'traveler' });
+    expect(mockReq.user).toMatchObject({ id: 1, role: 'traveler' });
     expect(mockNext).toHaveBeenCalled();
   });
 

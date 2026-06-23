@@ -66,15 +66,19 @@ function RegisterPage() {
     }
     setLoading(true);
     try {
+      let regData = { ...form };
       if (form.role === 'driver') {
         const formData = new FormData();
         Object.keys(form).forEach(key => formData.append(key, form[key]));
         formData.append('licenseDoc', licenseDoc);
         formData.append('vehicleRc', vehicleRc);
-        await api.post('/auth/register', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+        const res = await api.post('/auth/register', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+        regData.licenseDocUrl = res.data.licenseDocUrl;
+        regData.vehicleRcUrl = res.data.vehicleRcUrl;
       } else {
         await api.post('/auth/register', form);
       }
+      sessionStorage.setItem('pending_reg_data', JSON.stringify(regData));
       setPendingEmail(form.email);
       setShowOtp(true);
     } catch (err) {

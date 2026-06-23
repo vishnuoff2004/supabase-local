@@ -5,13 +5,13 @@
 
 -- Users
 
-INSERT INTO public."Users" (id, name, email, password, phone, role, active, "loginAttempts", "lockedUntil", "otpCode", "otpExpiry", "isVerified", "supabaseUid", "createdAt", "updatedAt") VALUES
-(1, 'Admin User', 'admin123@gmail.com', NULL, '9999999999', 'admin', true, 0, NULL, NULL, NULL, true, NULL, '2026-06-23 01:50:54.051+00', '2026-06-23 01:50:54.051+00'),
-(2, 'Agency Admin', 'agency@example.com', NULL, '9999999998', 'agency_admin', true, 0, NULL, NULL, NULL, true, NULL, '2026-06-23 01:50:54.051+00', '2026-06-23 01:50:54.051+00'),
-(3, 'Driver User', 'driver@example.com', NULL, '9999999997', 'driver', true, 0, NULL, NULL, NULL, true, NULL, '2026-06-23 01:50:54.051+00', '2026-06-23 01:50:54.051+00'),
-(4, 'Traveler One', 'traveler@example.com', NULL, '9999999996', 'traveler', true, 0, NULL, NULL, NULL, true, NULL, '2026-06-23 01:50:54.051+00', '2026-06-23 01:50:54.051+00'),
-(5, 'Traveler Two', 'traveler2@example.com', NULL, '9999999995', 'traveler', true, 0, NULL, NULL, NULL, true, NULL, '2026-06-23 01:50:54.051+00', '2026-06-23 01:50:54.051+00'),
-(6, 'Ramesh Kumar', 'ramesh@example.com', NULL, '8888888881', 'driver', true, 0, NULL, NULL, NULL, true, NULL, '2026-06-23 01:50:54.051+00', '2026-06-23 01:50:54.051+00');
+INSERT INTO public."Users" (id, name, phone, role, active, "loginAttempts", "lockedUntil", "otpCode", "otpExpiry", "isVerified", "supabaseUid", "createdAt", "updatedAt") VALUES
+(1, 'Admin User', '9999999999', 'admin', true, 0, NULL, NULL, NULL, true, NULL, '2026-06-23 01:50:54.051+00', '2026-06-23 01:50:54.051+00'),
+(2, 'Agency Admin', '9999999998', 'agency_admin', true, 0, NULL, NULL, NULL, true, NULL, '2026-06-23 01:50:54.051+00', '2026-06-23 01:50:54.051+00'),
+(3, 'Driver User', '9999999997', 'driver', true, 0, NULL, NULL, NULL, true, NULL, '2026-06-23 01:50:54.051+00', '2026-06-23 01:50:54.051+00'),
+(4, 'Traveler One', '9999999996', 'traveler', true, 0, NULL, NULL, NULL, true, NULL, '2026-06-23 01:50:54.051+00', '2026-06-23 01:50:54.051+00'),
+(5, 'Traveler Two', '9999999995', 'traveler', true, 0, NULL, NULL, NULL, true, NULL, '2026-06-23 01:50:54.051+00', '2026-06-23 01:50:54.051+00'),
+(6, 'Ramesh Kumar', '8888888881', 'driver', true, 0, NULL, NULL, NULL, true, NULL, '2026-06-23 01:50:54.051+00', '2026-06-23 01:50:54.051+00');
 
 -- Agencies
 

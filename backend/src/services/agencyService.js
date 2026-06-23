@@ -1,10 +1,12 @@
-const { Driver, Booking, User, Route, Agency, Sequelize } = require('../models');
+const { Driver, Booking, User, Route, Agency, AuthUser, Sequelize } = require('../models');
 const { Op } = Sequelize;
 
 async function getOrCreateAgency(userId) {
   let agency = await Agency.findOne({ where: { adminId: userId } });
   if (!agency) {
-    const user = await User.findByPk(userId);
+    const user = await User.findByPk(userId, {
+      include: [{ model: AuthUser, as: 'authUser' }]
+    });
     if (user && user.role === 'agency_admin') {
       try {
         agency = await Agency.create({
@@ -147,7 +149,7 @@ async function getBookings(userId, filters = {}) {
       { id: { [Op.like]: `%${search}%` } },
       { status: { [Op.like]: `%${search}%` } },
       { '$User.name$': { [Op.like]: `%${search}%` } },
-      { '$User.email$': { [Op.like]: `%${search}%` } },
+      { '$User.authUser.email$': { [Op.like]: `%${search}%` } },
       { '$User.phone$': { [Op.like]: `%${search}%` } },
       { '$Driver.name$': { [Op.like]: `%${search}%` } },
       { '$Route.source$': { [Op.like]: `%${search}%` } },
@@ -158,7 +160,11 @@ async function getBookings(userId, filters = {}) {
   const { count, rows } = await Booking.findAndCountAll({
     where,
     include: [
-      { model: User, attributes: ['name', 'email', 'phone'] },
+      {
+        model: User,
+        attributes: ['name', 'phone'],
+        include: [{ model: AuthUser, as: 'authUser' }]
+      },
       {
         model: Driver,
         attributes: ['name', 'phone', 'vehicleType', 'vehicleReg', 'licenseNo'],

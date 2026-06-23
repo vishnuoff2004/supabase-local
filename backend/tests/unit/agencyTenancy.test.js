@@ -1,3 +1,12 @@
+jest.mock('../../src/cache/CacheService', () => {
+  return {
+    CacheService: jest.fn().mockReturnValue({
+      get: jest.fn().mockResolvedValue(null),
+      set: jest.fn().mockResolvedValue(true),
+    })
+  };
+});
+
 const analyticsService = require('../../src/services/analyticsService');
 const reportsService = require('../../src/services/reportsService');
 const { Agency, Driver, Booking } = require('../../src/models');

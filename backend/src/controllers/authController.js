@@ -1,5 +1,5 @@
 const authService = require('../services/authService');
-const { validateRegister } = require('../validations/authValidation');
+const { validateRegister, validateLogin } = require('../validations/authValidation');
 
 async function register(req, res, next) {
   try {
@@ -84,4 +84,27 @@ async function oauthSetup(req, res, next) {
   }
 }
 
-module.exports = { register, completeRegistration, getMe, setupRole, updateProfile, oauthSetup };
+async function login(req, res, next) {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+    if (typeof validateLogin === 'function') {
+      const validation = validateLogin(req.body);
+      if (validation && validation.error) {
+        return res.status(400).json({ message: validation.error.details[0].message });
+      }
+    }
+    const result = await authService.login(email, password);
+    res.status(200).json(result);
+  } catch (err) {
+    if (err.status === 401) return res.status(401).json({ message: err.message });
+    if (err.status === 403) return res.status(403).json({ message: err.message });
+    if (err.status === 404) return res.status(404).json({ message: err.message });
+    if (err.status === 429) return res.status(429).json({ message: err.message });
+    next(err);
+  }
+}
+
+module.exports = { register, login, completeRegistration, getMe, setupRole, updateProfile, oauthSetup };

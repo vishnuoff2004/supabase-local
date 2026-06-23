@@ -1,8 +1,9 @@
 const { User } = require('../models');
 
 async function getProfile(userId) {
+  const { AuthUser } = require('../models');
   const user = await User.findByPk(userId, {
-    attributes: { exclude: ['password'] },
+    include: [{ model: AuthUser, as: 'authUser' }],
   });
   if (!user) {
     const err = new Error('User not found');
@@ -13,7 +14,10 @@ async function getProfile(userId) {
 }
 
 async function updateProfile(userId, data) {
-  const user = await User.findByPk(userId);
+  const { AuthUser } = require('../models');
+  const user = await User.findByPk(userId, {
+    include: [{ model: AuthUser, as: 'authUser' }],
+  });
   if (!user) {
     const err = new Error('User not found');
     err.status = 404;
@@ -30,7 +34,7 @@ async function updateProfile(userId, data) {
     if (data[field] !== undefined) updates[field] = data[field];
   });
   await user.update(updates);
-  const { password, ...userWithoutPassword } = user.toJSON();
+  const { password, authUser, ...userWithoutPassword } = user.toJSON();
   return userWithoutPassword;
 }
 
