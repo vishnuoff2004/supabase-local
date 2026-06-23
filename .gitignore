@@ -1,6 +1,19 @@
 node_modules/
 .env
+.env.local
 dist/
 build/
 *.log
 .DS_Store
+
+# Docker volumes — data (not config)
+supabase-docker/volumes/db/data/
+supabase-docker/volumes/storage/
+supabase-docker/volumes/functions/
+supabase-docker/volumes/snippets/
+
+# TLS private keys
+supabase-docker/volumes/mail/certs/*.key
+
+# Combined CA bundle (regenerated from mail/certs/ca.crt + system CAs)
+supabase-docker/volumes/auth/
